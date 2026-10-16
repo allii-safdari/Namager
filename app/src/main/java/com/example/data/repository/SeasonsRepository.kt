@@ -3,12 +3,10 @@ package com.example.data.repository
 import com.example.data.model.Episode
 import com.example.data.model.Season
 import com.example.data.model.Source
+import com.example.domain.repository.ISeasonsRepository
+import javax.inject.Inject
 
-interface ISeasonsRepository {
-    suspend fun getSeasons(seriesId: Int): List<Season>
-}
-
-class SeasonsRepository : BaseRepository(), ISeasonsRepository {
+class SeasonsRepository @Inject constructor() : BaseRepository(), ISeasonsRepository {
 
     override suspend fun getSeasons(seriesId: Int): List<Season> {
         val url = "$baseUrl/api/season/by/serie/$seriesId/$apiKey/"

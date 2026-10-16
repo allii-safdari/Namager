@@ -1,12 +1,10 @@
 package com.example.data.repository
 
 import com.example.data.model.Country
+import com.example.domain.repository.ICountryRepository
+import javax.inject.Inject
 
-interface ICountryRepository {
-    suspend fun getAllCountries(): List<Country>
-}
-
-class CountryRepository : BaseRepository(), ICountryRepository {
+class CountryRepository @Inject constructor() : BaseRepository(), ICountryRepository {
 
     override suspend fun getAllCountries(): List<Country> {
         val url = "$baseUrl/api/country/all/$apiKey/"

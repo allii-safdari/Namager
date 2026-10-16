@@ -1,12 +1,10 @@
 package com.example.data.repository
 
 import com.example.data.model.Genre
+import com.example.domain.repository.IGenreRepository
+import javax.inject.Inject
 
-interface IGenreRepository {
-    suspend fun getGenres(): List<Genre>
-}
-
-class GenreRepository : BaseRepository(), IGenreRepository {
+class GenreRepository @Inject constructor() : BaseRepository(), IGenreRepository {
 
     override suspend fun getGenres(): List<Genre> {
         val url = "$baseUrl/api/genre/all/$apiKey"

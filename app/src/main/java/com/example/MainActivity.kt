@@ -25,7 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.model.ScreenTab
 import com.example.ui.components.CinemaTopBar
 import com.example.ui.player.ExoPlayerView
@@ -33,13 +33,15 @@ import com.example.ui.screens.*
 import com.example.ui.theme.*
 import com.example.ui.util.PersianUtils
 import com.example.ui.viewmodel.CinemaViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            val viewModel: CinemaViewModel = viewModel()
+            val viewModel: CinemaViewModel = hiltViewModel()
             val settings by viewModel.settings.collectAsStateWithLifecycle()
 
             CinematicTheme {
@@ -53,7 +55,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun CinematicApp(
-    viewModel: CinemaViewModel = viewModel()
+    viewModel: CinemaViewModel = hiltViewModel()
 ) {
     val currentTab by viewModel.currentTab.collectAsStateWithLifecycle()
     val selectedMedia by viewModel.selectedMedia.collectAsStateWithLifecycle()

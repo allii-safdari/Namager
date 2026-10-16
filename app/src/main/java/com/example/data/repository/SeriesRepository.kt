@@ -2,12 +2,10 @@ package com.example.data.repository
 
 import com.example.data.model.FilterOrder
 import com.example.data.model.Series
+import com.example.domain.repository.ISeriesRepository
+import javax.inject.Inject
 
-interface ISeriesRepository {
-    suspend fun getSeries(page: Int = 0, genreId: Int = 0, order: FilterOrder = FilterOrder.CREATED): List<Series>
-}
-
-class SeriesRepository : BaseRepository(), ISeriesRepository {
+class SeriesRepository @Inject constructor() : BaseRepository(), ISeriesRepository {
 
     override suspend fun getSeries(page: Int, genreId: Int, order: FilterOrder): List<Series> {
         val url = "$baseUrl/api/serie/by/filtres/$genreId/${order.value}/$page/$apiKey"

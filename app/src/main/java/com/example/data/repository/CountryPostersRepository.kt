@@ -5,16 +5,10 @@ import com.example.data.model.FilterOrder
 import com.example.data.model.Genre
 import com.example.data.model.Poster
 import com.example.data.model.Source
+import com.example.domain.repository.ICountryPostersRepository
+import javax.inject.Inject
 
-interface ICountryPostersRepository {
-    suspend fun getPostersByCountry(
-        countryId: Int,
-        page: Int = 0,
-        order: FilterOrder = FilterOrder.CREATED
-    ): List<Poster>
-}
-
-class CountryPostersRepository : BaseRepository(), ICountryPostersRepository {
+class CountryPostersRepository @Inject constructor() : BaseRepository(), ICountryPostersRepository {
 
     override suspend fun getPostersByCountry(
         countryId: Int,

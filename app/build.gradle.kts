@@ -6,6 +6,7 @@ plugins {
   alias(libs.plugins.google.devtools.ksp)
   alias(libs.plugins.secrets)
   alias(libs.plugins.google.services)
+  alias(libs.plugins.hilt)
 }
 
 android {
@@ -36,8 +37,42 @@ android {
       keyAlias = "upload"
       keyPassword = System.getenv("KEY_PASSWORD")
     }
+
+    val debugKeystoreFile = file("${rootDir}/debug.keystore")
+    if (!debugKeystoreFile.exists()) {
+      val defaultDebugKeystore = file("${System.getProperty("user.home")}/.android/debug.keystore")
+      if (defaultDebugKeystore.exists()) {
+        try {
+          defaultDebugKeystore.copyTo(debugKeystoreFile, overwrite = true)
+        } catch (_: Exception) {}
+      } else {
+        try {
+          val javaHome = System.getProperty("java.home")
+          val keytoolBin = if (System.getProperty("os.name").lowercase().contains("win")) {
+            "$javaHome\\bin\\keytool.exe"
+          } else {
+            "$javaHome/bin/keytool"
+          }
+          val process = ProcessBuilder(
+            keytoolBin,
+            "-genkey",
+            "-v",
+            "-keystore", debugKeystoreFile.absolutePath,
+            "-storepass", "android",
+            "-alias", "androiddebugkey",
+            "-keypass", "android",
+            "-keyalg", "RSA",
+            "-keysize", "2048",
+            "-validity", "10000",
+            "-dname", "CN=Android Debug,O=Android,C=US"
+          ).redirectErrorStream(true).start()
+          process.waitFor()
+        } catch (_: Exception) {}
+      }
+    }
+
     create("debugConfig") {
-      storeFile = file("${rootDir}/debug.keystore")
+      storeFile = debugKeystoreFile
       storePassword = "android"
       keyAlias = "androiddebugkey"
       keyPassword = "android"
@@ -87,6 +122,9 @@ googleServices { missingGoogleServicesStrategy = MissingGoogleServicesStrategy.W
 // Some unused dependencies are commented out below instead of being removed.
 // This makes it easy to add them back in the future if needed.
 dependencies {
+  implementation(libs.hilt.android)
+  ksp(libs.hilt.compiler)
+  implementation(libs.androidx.hilt.navigation.compose)
   implementation(platform(libs.androidx.compose.bom))
   implementation(platform(libs.firebase.bom))
   // implementation(libs.accompanist.permissions)

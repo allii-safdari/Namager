@@ -5,14 +5,12 @@ import com.example.data.model.Genre
 import com.example.data.model.Poster
 import com.example.data.model.SearchResult
 import com.example.data.model.Source
+import com.example.domain.repository.ISearchRepository
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
+import javax.inject.Inject
 
-interface ISearchRepository {
-    suspend fun search(query: String): SearchResult
-}
-
-class SearchRepository : BaseRepository(), ISearchRepository {
+class SearchRepository @Inject constructor() : BaseRepository(), ISearchRepository {
 
     override suspend fun search(query: String): SearchResult {
         val encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8.toString()).replace("+", "%20")

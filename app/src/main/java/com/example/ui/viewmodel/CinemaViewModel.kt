@@ -6,13 +6,15 @@ import androidx.lifecycle.viewModelScope
 import com.example.data.CinemaSampleData
 import com.example.data.local.LocalPreferencesManager
 import com.example.data.model.*
-import com.example.data.repository.*
+import com.example.domain.repository.*
 import com.example.model.ScreenTab
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 sealed class UiState<out T> {
     object Loading : UiState<Nothing>()
@@ -21,18 +23,18 @@ sealed class UiState<out T> {
     object Empty : UiState<Nothing>()
 }
 
-class CinemaViewModel(
+@HiltViewModel
+class CinemaViewModel @Inject constructor(
     application: Application,
-    private val movieRepository: IMovieRepository = MovieRepository(),
-    private val seriesRepository: ISeriesRepository = SeriesRepository(),
-    private val seasonsRepository: ISeasonsRepository = SeasonsRepository(),
-    private val searchRepository: ISearchRepository = SearchRepository(),
-    private val genreRepository: IGenreRepository = GenreRepository(),
-    private val countryRepository: ICountryRepository = CountryRepository(),
-    private val countryPostersRepository: ICountryPostersRepository = CountryPostersRepository()
+    private val movieRepository: IMovieRepository,
+    private val seriesRepository: ISeriesRepository,
+    private val seasonsRepository: ISeasonsRepository,
+    private val searchRepository: ISearchRepository,
+    private val genreRepository: IGenreRepository,
+    private val countryRepository: ICountryRepository,
+    private val countryPostersRepository: ICountryPostersRepository,
+    private val localPrefs: LocalPreferencesManager
 ) : AndroidViewModel(application) {
-
-    private val localPrefs = LocalPreferencesManager(application)
 
     // Current Navigation tab
     private val _currentTab = MutableStateFlow(ScreenTab.MOVIES)
