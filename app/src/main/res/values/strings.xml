@@ -1,0 +1,43 @@
+<resources>
+    <string name="app_name">Cinematic View</string>
+    <string name="nav_movies">فیلم‌ها</string>
+    <string name="nav_series">سریال‌ها</string>
+    <string name="nav_search">جستجو</string>
+    <string name="nav_favorites">علاقه‌مندی‌ها</string>
+    <string name="nav_settings">تنظیمات</string>
+    
+    <!-- Legacy aliases -->
+    <string name="nav_home">فیلم‌ها</string>
+    <string name="nav_explore">جستجو</string>
+    <string name="nav_watchlist">علاقه‌مندی‌ها</string>
+    
+    <string name="section_featured">منتخب ویژه</string>
+    <string name="section_movies">فیلم‌های سینمایی</string>
+    <string name="section_series">سریال‌های اختصاصی</string>
+    <string name="section_top_rated">برترین امتیازها</string>
+    
+    <string name="btn_watch_now">پخش آنلاین</string>
+    <string name="btn_download">دانلود ویدیو</string>
+    <string name="btn_add_watchlist">نشان کردن</string>
+    <string name="btn_in_watchlist">در علاقه‌مندی‌ها</string>
+    <string name="btn_more_info">جزئیات کامل</string>
+    <string name="btn_back">بازگشت</string>
+    <string name="btn_share">اشتراک‌گذاری</string>
+    <string name="btn_play_episode">پخش قسمت</string>
+    <string name="retry_button">تلاش دوباره</string>
+    <string name="empty_content">موردی برای نمایش یافت نشد.</string>
+    
+    <string name="synopsis">خلاصه داستان</string>
+    <string name="episodes">قسمت‌ها و فصل‌ها</string>
+    <string name="watched_badge">دیده‌شده</string>
+    <string name="search_placeholder">جستجوی عنوان فیلم، سریال، موضوع…</string>
+    <string name="search_button">جستجو</string>
+    <string name="search_results">نتایج جستجو</string>
+    <string name="countries_title">محتوا بر اساس کشور</string>
+    <string name="empty_watchlist_title">لیست علاقه‌مندی‌های شما خالی است</string>
+    <string name="empty_watchlist_desc">فیلم‌ها و سریال‌های مورد علاقه خود را اضافه کنید تا در دسته‌بندی‌های اختصاصی ذخیره شوند.</string>
+    
+    <string name="order_created">جدیدترین</string>
+    <string name="order_year">سال ساخت</string>
+    <string name="order_imdb">امتیاز IMDb</string>
+</resources>

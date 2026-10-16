@@ -1,0 +1,6 @@
+{
+  "name": "Cinematic View",
+  "description": "پلتفرم سینمای ایران با طراحی مدرن متریال ۳ برای تماشا و بررسی فیلم‌ها و سریال‌های برتر",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
