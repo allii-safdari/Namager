@@ -51,26 +51,13 @@ fun UnifiedHeroBanner(
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             val imageUrl = if (media.cover.isNotEmpty()) media.cover else media.image
-            if (imageUrl.isNotEmpty()) {
-                AsyncImage(
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data(imageUrl)
-                        .crossfade(true)
-                        .build(),
-                    placeholder = painterResource(id = R.drawable.img_hero_cinema_1792095559768),
-                    error = painterResource(id = R.drawable.img_hero_cinema_1792095559768),
-                    contentDescription = media.title,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
-                )
-            } else {
-                Image(
-                    painter = painterResource(id = R.drawable.img_hero_cinema_1792095559768),
-                    contentDescription = media.title,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
-                )
-            }
+            CinematicPosterImage(
+                imageUrl = imageUrl,
+                contentDescription = media.title,
+                modifier = Modifier.fillMaxSize(),
+                shape = RoundedCornerShape(24.dp),
+                contentScale = ContentScale.Crop
+            )
 
             // Dark Multi-Stop Gradient Overlays
             Box(

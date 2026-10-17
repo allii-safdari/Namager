@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.data.CinemaSampleData
 import com.example.data.local.LocalPreferencesManager
 import com.example.data.model.*
+import com.example.data.repository.*
 import com.example.domain.repository.*
 import com.example.model.ScreenTab
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,14 +27,14 @@ sealed class UiState<out T> {
 @HiltViewModel
 class CinemaViewModel @Inject constructor(
     application: Application,
-    private val movieRepository: IMovieRepository,
-    private val seriesRepository: ISeriesRepository,
-    private val seasonsRepository: ISeasonsRepository,
-    private val searchRepository: ISearchRepository,
-    private val genreRepository: IGenreRepository,
-    private val countryRepository: ICountryRepository,
-    private val countryPostersRepository: ICountryPostersRepository,
-    private val localPrefs: LocalPreferencesManager
+    private val movieRepository: IMovieRepository = MovieRepository(),
+    private val seriesRepository: ISeriesRepository = SeriesRepository(),
+    private val seasonsRepository: ISeasonsRepository = SeasonsRepository(),
+    private val searchRepository: ISearchRepository = SearchRepository(),
+    private val genreRepository: IGenreRepository = GenreRepository(),
+    private val countryRepository: ICountryRepository = CountryRepository(),
+    private val countryPostersRepository: ICountryPostersRepository = CountryPostersRepository(),
+    private val localPrefs: LocalPreferencesManager = LocalPreferencesManager(application)
 ) : AndroidViewModel(application) {
 
     // Current Navigation tab
@@ -150,39 +151,22 @@ class CinemaViewModel @Inject constructor(
     }
 
     private fun loadInitialData() {
-        // Load fallback initial slider
-        seedInitialFeaturedSlider()
-        // Load genres & countries from server
         loadGenres()
         loadCountries()
-        // Load movies and series
+        loadFeaturedSliderFromServer()
         loadMovies(isRefresh = true)
         loadSeries(isRefresh = true)
     }
 
-    private fun seedInitialFeaturedSlider() {
-        val fallback = CinemaSampleData.movies.take(5).mapIndexed { idx, m ->
-            UnifiedMedia(
-                id = idx + 1000,
-                title = m.title,
-                type = if (m.mediaType == com.example.model.MediaType.SERIES) "serie" else "movie",
-                description = m.synopsis,
-                year = m.releaseYear.filter { it.isDigit() }.toIntOrNull() ?: 1402,
-                imdb = m.imdbRating.toDouble(),
-                rating = m.imdbRating.toDouble(),
-                duration = m.duration,
-                image = "",
-                cover = "",
-                genres = m.genres.mapIndexed { gIdx, g -> Genre(gIdx + 1, g) },
-                sources = listOf(
-                    Source(1, "1080p", "mkv", "https://dl.sample-iranian-media.com/1080p.mkv"),
-                    Source(2, "720p", "mp4", "https://dl.sample-iranian-media.com/720p.mp4")
-                ),
-                country = listOf(Country(1, "ایران")),
-                isSeries = m.mediaType == com.example.model.MediaType.SERIES
-            )
+    private fun loadFeaturedSliderFromServer() {
+        viewModelScope.launch {
+            try {
+                val topMovies = movieRepository.getMovies(page = 0, genreId = 0, order = FilterOrder.IMDB)
+                if (topMovies.isNotEmpty()) {
+                    _featuredSlider.value = topMovies.take(5).map { it.toUnified() }
+                }
+            } catch (_: Exception) {}
         }
-        _featuredSlider.value = fallback
     }
 
     fun loadGenres() {

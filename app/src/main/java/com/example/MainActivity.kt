@@ -44,7 +44,10 @@ class MainActivity : ComponentActivity() {
             val viewModel: CinemaViewModel = hiltViewModel()
             val settings by viewModel.settings.collectAsStateWithLifecycle()
 
-            CinematicTheme {
+            CinematicTheme(
+                themeMode = settings.themeMode,
+                accentColor = Color(settings.accentColorHex)
+            ) {
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                     CinematicApp(viewModel = viewModel)
                 }

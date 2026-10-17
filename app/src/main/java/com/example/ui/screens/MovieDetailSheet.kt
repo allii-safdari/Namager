@@ -39,6 +39,7 @@ import com.example.R
 import com.example.data.model.Episode
 import com.example.data.model.Source
 import com.example.data.model.UnifiedMedia
+import com.example.ui.components.CinematicPosterImage
 import com.example.ui.components.DownloadOptionsDialog
 import com.example.ui.components.EmptyStateView
 import com.example.ui.components.ErrorRetryView
@@ -109,26 +110,13 @@ fun MovieDetailSheet(
                         .height(280.dp)
                 ) {
                     val backdropUrl = if (media.cover.isNotEmpty()) media.cover else media.image
-                    if (backdropUrl.isNotEmpty()) {
-                        AsyncImage(
-                            model = ImageRequest.Builder(LocalContext.current)
-                                .data(backdropUrl)
-                                .crossfade(true)
-                                .build(),
-                            placeholder = painterResource(id = R.drawable.img_hero_cinema_1792095559768),
-                            error = painterResource(id = R.drawable.img_hero_cinema_1792095559768),
-                            contentDescription = media.title,
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop
-                        )
-                    } else {
-                        Image(
-                            painter = painterResource(id = R.drawable.img_hero_cinema_1792095559768),
-                            contentDescription = media.title,
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop
-                        )
-                    }
+                    CinematicPosterImage(
+                        imageUrl = backdropUrl,
+                        contentDescription = media.title,
+                        modifier = Modifier.fillMaxSize(),
+                        shape = RoundedCornerShape(0.dp),
+                        contentScale = ContentScale.Crop
+                    )
 
                     // Vignette Gradient
                     Box(
@@ -266,6 +254,58 @@ fun MovieDetailSheet(
                                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                                     )
                                 }
+                            }
+                        }
+                    }
+
+                    // Grand Action Bar for Movies
+                    if (!media.isSeries) {
+                        val availableSources = if (media.sources.isNotEmpty()) media.sources else listOf(
+                            Source(1, "1080p", "mkv", "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"),
+                            Source(2, "720p", "mp4", "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4")
+                        )
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 8.dp),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            Button(
+                                onClick = {
+                                    qualitySelectionDialogData = QualityDialogData(
+                                        title = media.title,
+                                        sources = availableSources
+                                    )
+                                },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(48.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.primary,
+                                    contentColor = MaterialTheme.colorScheme.onPrimary
+                                ),
+                                shape = RoundedCornerShape(50.dp)
+                            ) {
+                                Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(20.dp))
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text("پخش آنلاین", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                            }
+
+                            OutlinedButton(
+                                onClick = {
+                                    val first = availableSources.first()
+                                    viewModel.openDownloadOptions(first)
+                                },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(48.dp),
+                                border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary),
+                                shape = RoundedCornerShape(50.dp)
+                            ) {
+                                Icon(Icons.Default.Download, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text("دانلود ویدیو", fontWeight = FontWeight.Bold, fontSize = 13.sp, color = TextPrimary)
                             }
                         }
                     }
@@ -605,26 +645,13 @@ private fun EpisodeListItem(
                     .clip(RoundedCornerShape(8.dp))
                     .background(DarkSurfaceVariant)
             ) {
-                if (episode.image.isNotEmpty()) {
-                    AsyncImage(
-                        model = ImageRequest.Builder(LocalContext.current)
-                            .data(episode.image)
-                            .crossfade(true)
-                            .build(),
-                        placeholder = painterResource(id = R.drawable.img_series_crime_1792095573776),
-                        error = painterResource(id = R.drawable.img_series_crime_1792095573776),
-                        contentDescription = episode.title,
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
-                } else {
-                    Image(
-                        painter = painterResource(id = R.drawable.img_series_crime_1792095573776),
-                        contentDescription = episode.title,
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
-                }
+                CinematicPosterImage(
+                    imageUrl = episode.image,
+                    contentDescription = episode.title,
+                    modifier = Modifier.fillMaxSize(),
+                    shape = RoundedCornerShape(8.dp),
+                    contentScale = ContentScale.Crop
+                )
 
                 // Play overlay icon
                 Box(

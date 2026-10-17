@@ -71,27 +71,13 @@ fun UnifiedMediaCard(
                     .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
                     .background(DarkSurfaceVariant)
             ) {
-                // Async image with Coil
-                if (media.image.isNotEmpty()) {
-                    AsyncImage(
-                        model = ImageRequest.Builder(LocalContext.current)
-                            .data(media.image)
-                            .crossfade(true)
-                            .build(),
-                        placeholder = painterResource(id = R.drawable.img_hero_cinema_1792095559768),
-                        error = painterResource(id = R.drawable.img_hero_cinema_1792095559768),
-                        contentDescription = media.title,
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
-                } else {
-                    androidx.compose.foundation.Image(
-                        painter = painterResource(id = R.drawable.img_hero_cinema_1792095559768),
-                        contentDescription = media.title,
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
-                }
+                CinematicPosterImage(
+                    imageUrl = media.image,
+                    contentDescription = media.title,
+                    modifier = Modifier.fillMaxSize(),
+                    shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+                    contentScale = ContentScale.Crop
+                )
 
                 // Gradient Vignette
                 Box(
