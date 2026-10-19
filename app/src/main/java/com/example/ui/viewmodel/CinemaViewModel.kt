@@ -69,9 +69,17 @@ class CinemaViewModel @Inject constructor(
     private val _featuredSlider = MutableStateFlow<List<UnifiedMedia>>(emptyList())
     val featuredSlider: StateFlow<List<UnifiedMedia>> = _featuredSlider.asStateFlow()
 
-    // Pull-to-refresh state (true until slider + movies are reloaded)
+    // Featured Series Slider (5 newest series)
+    private val _featuredSeriesSlider = MutableStateFlow<List<UnifiedMedia>>(emptyList())
+    val featuredSeriesSlider: StateFlow<List<UnifiedMedia>> = _featuredSeriesSlider.asStateFlow()
+
+    // Pull-to-refresh state for movies
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
+
+    // Pull-to-refresh state for series
+    private val _isSeriesRefreshing = MutableStateFlow(false)
+    val isSeriesRefreshing: StateFlow<Boolean> = _isSeriesRefreshing.asStateFlow()
 
     // Movies list state & pagination
     private val _moviesState = MutableStateFlow<UiState<List<UnifiedMedia>>>(UiState.Loading)
@@ -202,6 +210,7 @@ class CinemaViewModel @Inject constructor(
         loadGenres()
         loadCountries()
         loadFeaturedSliderFromServer()
+        loadFeaturedSeriesSliderFromServer()
         loadMovies(isRefresh = true)
         loadSeries(isRefresh = true)
     }
@@ -219,6 +228,40 @@ class CinemaViewModel @Inject constructor(
             } finally {
                 _isRefreshing.value = false
             }
+        }
+    }
+
+    /** Reloads the series slider and the series list together (used by pull-to-refresh). */
+    fun refreshSeries() {
+        if (_isSeriesRefreshing.value) return
+        viewModelScope.launch {
+            _isSeriesRefreshing.value = true
+            try {
+                joinAll(
+                    loadFeaturedSeriesSliderFromServer(),
+                    loadSeries(isRefresh = true)
+                )
+            } finally {
+                _isSeriesRefreshing.value = false
+            }
+        }
+    }
+
+    // --- Featured series slider: 5 newest series ---
+    fun loadFeaturedSeriesSliderFromServer(): Job = viewModelScope.launch {
+        try {
+            val latest = seriesRepository.getSeries(
+                page = 0,
+                genreId = 0,
+                order = FilterOrder.CREATED
+            )
+            val picked = pickLatest(latest.map { it.toUnified() })
+            if (picked.isNotEmpty()) {
+                _featuredSeriesSlider.value = picked
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (_: Exception) {
         }
     }
 
@@ -375,6 +418,11 @@ class CinemaViewModel @Inject constructor(
                     currentSeriesList.addAll(unified)
                     _seriesState.value = UiState.Success(currentSeriesList.distinctBy { it.id })
                     seriesPage++
+
+                    // Fallback only if the server slider request failed
+                    if (_featuredSeriesSlider.value.isEmpty()) {
+                        _featuredSeriesSlider.value = pickLatest(currentSeriesList)
+                    }
                 }
             } catch (e: CancellationException) {
                 throw e

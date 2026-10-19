@@ -180,7 +180,8 @@ private fun AnimatedTabContent(
                 ScreenTab.SERIES -> {
                     SeriesScreen(
                         viewModel = viewModel,
-                        onMediaClick = { viewModel.selectMedia(it) }
+                        onMediaClick = { viewModel.selectMedia(it) },
+                        onSearchClick = { viewModel.setTab(ScreenTab.SEARCH) }
                     )
                 }
                 ScreenTab.SEARCH -> {

@@ -11,20 +11,26 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
-import androidx.compose.material3.SegmentedButtonDefaults.Icon
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.model.Genre
 import com.example.ui.theme.CinemaRed
-import com.example.ui.theme.DarkSurface
+import com.example.ui.theme.GlassBorder
 import com.example.ui.theme.TextPrimary
 
+/**
+ * چیپ‌های فیلتر ژانر به سبک شیشه‌ای (Glassmorphism).
+ * دارای پس‌زمینه شفاف کنترل‌شده، حاشیه شیشه‌ای و کنتراست بالا برای سازگاری با پس‌زمینه‌های اسلایدشو.
+ */
 @Composable
 fun GenreChipsRow(
     genres: List<Genre>,
@@ -48,20 +54,34 @@ fun GenreChipsRow(
             FilterChip(
                 selected = isSelected,
                 onClick = { onGenreSelected(if (isSelected) null else genre.id) },
-                label = { Text(genre.title, fontSize = 12.sp) },
+                label = {
+                    Text(
+                        text = genre.title,
+                        fontSize = 12.sp,
+                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                },
                 leadingIcon = if (isSelected) {
-                    { androidx.compose.material3.Icon(Icons.Default.Check, null, modifier = Modifier.size(16.dp)) }
+                    {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                            tint = Color.White
+                        )
+                    }
                 } else null,
                 shape = CircleShape,
                 colors = FilterChipDefaults.filterChipColors(
                     selectedContainerColor = CinemaRed,
                     selectedLabelColor = Color.White,
-                    containerColor = DarkSurface,
+                    containerColor = Color(0x661E1E2C), // شفافیت شیشه‌ای کنترل‌شده
                     labelColor = TextPrimary
                 ),
                 border = FilterChipDefaults.filterChipBorder(
-                    borderColor = Color(0x22FFFFFF),
-                    selectedBorderColor = CinemaRed,
+                    borderColor = GlassBorder,
+                    selectedBorderColor = Color.White.copy(alpha = 0.8f),
                     enabled = true,
                     selected = isSelected
                 ),
