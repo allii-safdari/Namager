@@ -3,17 +3,22 @@ package com.example.ui.viewmodel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.data.CinemaSampleData
 import com.example.data.local.LocalPreferencesManager
 import com.example.data.model.*
 import com.example.data.repository.*
 import com.example.domain.repository.*
 import com.example.model.ScreenTab
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -23,6 +28,8 @@ sealed class UiState<out T> {
     data class Error(val message: String) : UiState<Nothing>()
     object Empty : UiState<Nothing>()
 }
+
+private const val FEATURED_COUNT = 5
 
 @HiltViewModel
 class CinemaViewModel @Inject constructor(
@@ -42,10 +49,10 @@ class CinemaViewModel @Inject constructor(
     val currentTab: StateFlow<ScreenTab> = _currentTab.asStateFlow()
 
     // Filters for Movies & Series
-    private val _selectedGenreId = MutableStateFlow(0)
-    val selectedGenreId: StateFlow<Int> = _selectedGenreId.asStateFlow()
+    private val _selectedGenreId = MutableStateFlow<Int?>(null)
+    val selectedGenreId: StateFlow<Int?> = _selectedGenreId.asStateFlow()
 
-    private val _selectedOrder = MutableStateFlow(FilterOrder.CREATED)
+    private val _selectedOrder = MutableStateFlow(FilterOrder.YEAR)
     val selectedOrder: StateFlow<FilterOrder> = _selectedOrder.asStateFlow()
 
     // Compatibility alias
@@ -58,9 +65,13 @@ class CinemaViewModel @Inject constructor(
     private val _countries = MutableStateFlow<List<Country>>(emptyList())
     val countries: StateFlow<List<Country>> = _countries.asStateFlow()
 
-    // Featured Hero Slider
+    // Featured Hero Slider (5 newest, recently released movies)
     private val _featuredSlider = MutableStateFlow<List<UnifiedMedia>>(emptyList())
     val featuredSlider: StateFlow<List<UnifiedMedia>> = _featuredSlider.asStateFlow()
+
+    // Pull-to-refresh state (true until slider + movies are reloaded)
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
     // Movies list state & pagination
     private val _moviesState = MutableStateFlow<UiState<List<UnifiedMedia>>>(UiState.Loading)
@@ -69,6 +80,8 @@ class CinemaViewModel @Inject constructor(
     private var moviesPage = 0
     private var isMoviesLastPage = false
     private var isMoviesLoadingMore = false
+    private var moviesJob: Job? = null
+    private var moreMoviesJob: Job? = null
 
     // Series list state & pagination
     private val _seriesState = MutableStateFlow<UiState<List<UnifiedMedia>>>(UiState.Loading)
@@ -77,6 +90,8 @@ class CinemaViewModel @Inject constructor(
     private var seriesPage = 0
     private var isSeriesLastPage = false
     private var isSeriesLoadingMore = false
+    private var seriesJob: Job? = null
+    private var moreSeriesJob: Job? = null
 
     // Country page state
     private val _selectedCountry = MutableStateFlow<Country?>(null)
@@ -87,6 +102,9 @@ class CinemaViewModel @Inject constructor(
     private val currentCountryList = mutableListOf<UnifiedMedia>()
     private var countryPage = 0
     private var isCountryLastPage = false
+    private var isCountryLoadingMore = false
+    private var countryJob: Job? = null
+    private var moreCountryJob: Job? = null
 
     // Search state (executed only on explicit button tap)
     private val _searchQuery = MutableStateFlow("")
@@ -94,6 +112,7 @@ class CinemaViewModel @Inject constructor(
 
     private val _searchState = MutableStateFlow<UiState<List<UnifiedMedia>>>(UiState.Empty)
     val searchState: StateFlow<UiState<List<UnifiedMedia>>> = _searchState.asStateFlow()
+    private var searchJob: Job? = null
 
     // Selected Media Item (for detail sheet/screen)
     private val _selectedMedia = MutableStateFlow<UnifiedMedia?>(null)
@@ -102,6 +121,7 @@ class CinemaViewModel @Inject constructor(
     // Seasons & Episodes for selected series
     private val _seasonsState = MutableStateFlow<UiState<List<Season>>>(UiState.Loading)
     val seasonsState: StateFlow<UiState<List<Season>>> = _seasonsState.asStateFlow()
+    private var seasonsJob: Job? = null
 
     // Favorites & Groups
     private val _favoriteGroups = MutableStateFlow<List<FavoriteGroup>>(emptyList())
@@ -134,21 +154,49 @@ class CinemaViewModel @Inject constructor(
     private val _activeSourceForDownload = MutableStateFlow<Source?>(null)
     val activeSourceForDownload: StateFlow<Source?> = _activeSourceForDownload.asStateFlow()
 
-    // Backward compatibility flows
-    val movies: StateFlow<List<UnifiedMedia>> get() = MutableStateFlow(currentMoviesList.toList()).asStateFlow()
-    val series: StateFlow<List<UnifiedMedia>> get() = MutableStateFlow(currentSeriesList.toList()).asStateFlow()
-    val currentSeasons: StateFlow<List<Season>> get() {
-        val s = (_seasonsState.value as? UiState.Success)?.data ?: emptyList()
-        return MutableStateFlow(s).asStateFlow()
-    }
-    val isLoading: StateFlow<Boolean> get() = MutableStateFlow(_moviesState.value is UiState.Loading).asStateFlow()
-    val watchlistIds: StateFlow<Set<Int>> get() = MutableStateFlow(_favoriteItems.value.map { it.mediaId }.toSet()).asStateFlow()
-    val isPlaying: StateFlow<Boolean> get() = MutableStateFlow(_activePlayingSource.value != null).asStateFlow()
+    // Backward compatibility flows.
+    // These are now real, reactive StateFlows derived from the backing flows
+    // (previously a new MutableStateFlow was created on every access, so they never updated).
+    val movies: StateFlow<List<UnifiedMedia>> = _moviesState
+        .map { it.dataOrEmpty() }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    val series: StateFlow<List<UnifiedMedia>> = _seriesState
+        .map { it.dataOrEmpty() }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    val currentSeasons: StateFlow<List<Season>> = _seasonsState
+        .map { it.dataOrEmpty() }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    val isLoading: StateFlow<Boolean> = _moviesState
+        .map { it is UiState.Loading }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, true)
+
+    val watchlistIds: StateFlow<Set<Int>> = _favoriteItems
+        .map { items -> items.map { it.mediaId }.toSet() }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptySet())
+
+    val isPlaying: StateFlow<Boolean> = _activePlayingSource
+        .map { it != null }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     init {
         loadInitialData()
         refreshFavorites()
     }
+
+    private fun <T> UiState<List<T>>.dataOrEmpty(): List<T> =
+        (this as? UiState.Success)?.data ?: emptyList()
+
+    /**
+     * Picks the 5 newest movies: sorted by release year (descending).
+     * The sort is stable, so for equal years the server order (newest added first) is kept.
+     */
+    private fun pickLatest(list: List<UnifiedMedia>): List<UnifiedMedia> =
+        list.distinctBy { it.id }
+            .sortedByDescending { it.year }
+            .take(FEATURED_COUNT)
 
     private fun loadInitialData() {
         loadGenres()
@@ -158,14 +206,37 @@ class CinemaViewModel @Inject constructor(
         loadSeries(isRefresh = true)
     }
 
-    private fun loadFeaturedSliderFromServer() {
+    /** Reloads the slider and the movie list together (used by pull-to-refresh). */
+    fun refreshHome() {
+        if (_isRefreshing.value) return
         viewModelScope.launch {
+            _isRefreshing.value = true
             try {
-                val topMovies = movieRepository.getMovies(page = 0, genreId = 0, order = FilterOrder.IMDB)
-                if (topMovies.isNotEmpty()) {
-                    _featuredSlider.value = topMovies.take(5).map { it.toUnified() }
-                }
-            } catch (_: Exception) {}
+                joinAll(
+                    loadFeaturedSliderFromServer(),
+                    loadMovies(isRefresh = true)
+                )
+            } finally {
+                _isRefreshing.value = false
+            }
+        }
+    }
+
+    // --- Featured slider: 5 newest & recently released movies ---
+    fun loadFeaturedSliderFromServer(): Job = viewModelScope.launch {
+        try {
+            val latest = movieRepository.getMovies(
+                page = 0,
+                genreId = 0,
+                order = FilterOrder.CREATED
+            )
+            val picked = pickLatest(latest.map { it.toUnified() })
+            if (picked.isNotEmpty()) {
+                _featuredSlider.value = picked
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (_: Exception) {
         }
     }
 
@@ -176,7 +247,10 @@ class CinemaViewModel @Inject constructor(
                 if (serverGenres.isNotEmpty()) {
                     _genres.value = serverGenres
                 }
-            } catch (_: Exception) {}
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+            }
         }
     }
 
@@ -187,24 +261,31 @@ class CinemaViewModel @Inject constructor(
                 if (serverCountries.isNotEmpty()) {
                     _countries.value = serverCountries
                 }
-            } catch (_: Exception) {}
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+            }
         }
     }
 
     // --- Movies Pagination & Filtering ---
-    fun loadMovies(isRefresh: Boolean = false) {
+    fun loadMovies(isRefresh: Boolean = false): Job {
         if (isRefresh) {
+            // Cancel in-flight requests so stale responses can't mix into the new list
+            moviesJob?.cancel()
+            moreMoviesJob?.cancel()
             moviesPage = 0
             isMoviesLastPage = false
+            isMoviesLoadingMore = false
             currentMoviesList.clear()
             _moviesState.value = UiState.Loading
         }
 
-        viewModelScope.launch {
+        val job = viewModelScope.launch {
             try {
                 val result = movieRepository.getMovies(
                     page = moviesPage,
-                    genreId = _selectedGenreId.value,
+                    genreId = _selectedGenreId.value ?: 0 ,
                     order = _selectedOrder.value
                 )
                 val unified = result.map { it.toUnified() }
@@ -219,28 +300,32 @@ class CinemaViewModel @Inject constructor(
                     _moviesState.value = UiState.Success(currentMoviesList.distinctBy { it.id })
                     moviesPage++
 
-                    // Update slider with top movies if available
-                    if (_featuredSlider.value.size <= 2) {
-                        _featuredSlider.value = currentMoviesList.take(5)
+                    // Fallback only if the server slider request failed
+                    if (_featuredSlider.value.isEmpty()) {
+                        _featuredSlider.value = pickLatest(currentMoviesList)
                     }
                 }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 if (currentMoviesList.isEmpty()) {
                     _moviesState.value = UiState.Error(e.message ?: "خطا در دریافت لیست فیلم‌ها")
                 }
             }
         }
+        moviesJob = job
+        return job
     }
 
     fun loadMoreMovies() {
         if (isMoviesLastPage || isMoviesLoadingMore || _moviesState.value is UiState.Loading) return
         isMoviesLoadingMore = true
 
-        viewModelScope.launch {
+        moreMoviesJob = viewModelScope.launch {
             try {
                 val result = movieRepository.getMovies(
                     page = moviesPage,
-                    genreId = _selectedGenreId.value,
+                    genreId = _selectedGenreId.value ?: 0 ,
                     order = _selectedOrder.value
                 )
                 val unified = result.map { it.toUnified() }
@@ -251,6 +336,8 @@ class CinemaViewModel @Inject constructor(
                     _moviesState.value = UiState.Success(currentMoviesList.distinctBy { it.id })
                     moviesPage++
                 }
+            } catch (e: CancellationException) {
+                throw e
             } catch (_: Exception) {
             } finally {
                 isMoviesLoadingMore = false
@@ -259,19 +346,22 @@ class CinemaViewModel @Inject constructor(
     }
 
     // --- Series Pagination & Filtering ---
-    fun loadSeries(isRefresh: Boolean = false) {
+    fun loadSeries(isRefresh: Boolean = false): Job {
         if (isRefresh) {
+            seriesJob?.cancel()
+            moreSeriesJob?.cancel()
             seriesPage = 0
             isSeriesLastPage = false
+            isSeriesLoadingMore = false
             currentSeriesList.clear()
             _seriesState.value = UiState.Loading
         }
 
-        viewModelScope.launch {
+        val job = viewModelScope.launch {
             try {
                 val result = seriesRepository.getSeries(
                     page = seriesPage,
-                    genreId = _selectedGenreId.value,
+                    genreId = _selectedGenreId.value ?: 0 ,
                     order = _selectedOrder.value
                 )
                 val unified = result.map { it.toUnified() }
@@ -286,23 +376,27 @@ class CinemaViewModel @Inject constructor(
                     _seriesState.value = UiState.Success(currentSeriesList.distinctBy { it.id })
                     seriesPage++
                 }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 if (currentSeriesList.isEmpty()) {
                     _seriesState.value = UiState.Error(e.message ?: "خطا در دریافت لیست سریال‌ها")
                 }
             }
         }
+        seriesJob = job
+        return job
     }
 
     fun loadMoreSeries() {
         if (isSeriesLastPage || isSeriesLoadingMore || _seriesState.value is UiState.Loading) return
         isSeriesLoadingMore = true
 
-        viewModelScope.launch {
+        moreSeriesJob = viewModelScope.launch {
             try {
                 val result = seriesRepository.getSeries(
                     page = seriesPage,
-                    genreId = _selectedGenreId.value,
+                    genreId = _selectedGenreId.value ?: 0 ,
                     order = _selectedOrder.value
                 )
                 val unified = result.map { it.toUnified() }
@@ -313,6 +407,8 @@ class CinemaViewModel @Inject constructor(
                     _seriesState.value = UiState.Success(currentSeriesList.distinctBy { it.id })
                     seriesPage++
                 }
+            } catch (e: CancellationException) {
+                throw e
             } catch (_: Exception) {
             } finally {
                 isSeriesLoadingMore = false
@@ -320,7 +416,8 @@ class CinemaViewModel @Inject constructor(
         }
     }
 
-    fun setGenreFilter(genreId: Int) {
+    // Genre / order filters affect the lists only; the featured slider always stays "latest releases"
+    fun setGenreFilter(genreId: Int?) {
         _selectedGenreId.value = genreId
         loadMovies(isRefresh = true)
         loadSeries(isRefresh = true)
@@ -342,12 +439,14 @@ class CinemaViewModel @Inject constructor(
     fun executeSearch() {
         val query = _searchQuery.value.trim()
         if (query.isEmpty()) {
+            searchJob?.cancel()
             _searchState.value = UiState.Empty
             return
         }
 
+        searchJob?.cancel()
         _searchState.value = UiState.Loading
-        viewModelScope.launch {
+        searchJob = viewModelScope.launch {
             try {
                 val result = searchRepository.search(query)
                 val unified = result.posters.map { it.toUnified() }
@@ -356,6 +455,8 @@ class CinemaViewModel @Inject constructor(
                 } else {
                     _searchState.value = UiState.Success(unified)
                 }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 _searchState.value = UiState.Error(e.message ?: "خطا در جستجو")
             }
@@ -363,6 +464,7 @@ class CinemaViewModel @Inject constructor(
     }
 
     fun clearSearch() {
+        searchJob?.cancel()
         _searchQuery.value = ""
         _searchState.value = UiState.Empty
     }
@@ -373,19 +475,24 @@ class CinemaViewModel @Inject constructor(
         if (country != null) {
             loadCountryContent(country, isRefresh = true)
         } else {
+            countryJob?.cancel()
+            moreCountryJob?.cancel()
             _countryContentState.value = UiState.Empty
         }
     }
 
     fun loadCountryContent(country: Country, isRefresh: Boolean = false) {
         if (isRefresh) {
+            countryJob?.cancel()
+            moreCountryJob?.cancel()
             countryPage = 0
             isCountryLastPage = false
+            isCountryLoadingMore = false
             currentCountryList.clear()
             _countryContentState.value = UiState.Loading
         }
 
-        viewModelScope.launch {
+        countryJob = viewModelScope.launch {
             try {
                 val posters = countryPostersRepository.getPostersByCountry(
                     countryId = country.id,
@@ -404,6 +511,8 @@ class CinemaViewModel @Inject constructor(
                     _countryContentState.value = UiState.Success(currentCountryList.distinctBy { it.id })
                     countryPage++
                 }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 if (currentCountryList.isEmpty()) {
                     _countryContentState.value = UiState.Error(e.message ?: "خطا در دریافت آثار کشور ${country.title}")
@@ -414,9 +523,10 @@ class CinemaViewModel @Inject constructor(
 
     fun loadMoreCountryContent() {
         val country = _selectedCountry.value ?: return
-        if (isCountryLastPage || _countryContentState.value is UiState.Loading) return
+        if (isCountryLastPage || isCountryLoadingMore || _countryContentState.value is UiState.Loading) return
+        isCountryLoadingMore = true
 
-        viewModelScope.launch {
+        moreCountryJob = viewModelScope.launch {
             try {
                 val posters = countryPostersRepository.getPostersByCountry(
                     countryId = country.id,
@@ -431,7 +541,12 @@ class CinemaViewModel @Inject constructor(
                     _countryContentState.value = UiState.Success(currentCountryList.distinctBy { it.id })
                     countryPage++
                 }
-            } catch (_: Exception) {}
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+            } finally {
+                isCountryLoadingMore = false
+            }
         }
     }
 
@@ -441,13 +556,15 @@ class CinemaViewModel @Inject constructor(
         if (media != null && media.isSeries) {
             loadSeasons(media.id)
         } else {
+            seasonsJob?.cancel()
             _seasonsState.value = UiState.Empty
         }
     }
 
     fun loadSeasons(seriesId: Int) {
+        seasonsJob?.cancel()
         _seasonsState.value = UiState.Loading
-        viewModelScope.launch {
+        seasonsJob = viewModelScope.launch {
             try {
                 val seasons = seasonsRepository.getSeasons(seriesId)
                 if (seasons.isEmpty()) {
@@ -455,6 +572,8 @@ class CinemaViewModel @Inject constructor(
                 } else {
                     _seasonsState.value = UiState.Success(seasons)
                 }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 _seasonsState.value = UiState.Error(e.message ?: "خطا در بارگذاری فصل‌ها")
             }

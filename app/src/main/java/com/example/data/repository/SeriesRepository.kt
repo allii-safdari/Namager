@@ -20,7 +20,15 @@ class SeriesRepository @Inject constructor() : BaseRepository(), ISeriesReposito
         for (i in 0 until jsonArray.length()) {
             try {
                 val seriesObj = jsonArray.getJSONObject(i)
-                seriesList.add(parseSeriesItem(seriesObj))
+                val series = parseSeriesItem(seriesObj)
+                val title = series.title
+                val isUnwanted = title.contains("هورتون") ||
+                        title.contains("ملودی باکس") ||
+                        title.contains("بروز رسانی نسخه ویندوز") ||
+                        title.contains("آموزش زبان به سبک مووی باکس")
+                if (!isUnwanted) {
+                    seriesList.add(series)
+                }
             } catch (_: Exception) {
                 continue
             }

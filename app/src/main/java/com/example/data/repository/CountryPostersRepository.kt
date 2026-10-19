@@ -27,7 +27,15 @@ class CountryPostersRepository @Inject constructor() : BaseRepository(), ICountr
         for (i in 0 until jsonArray.length()) {
             try {
                 val posterObj = jsonArray.getJSONObject(i)
-                posters.add(parsePoster(posterObj))
+                val poster = parsePoster(posterObj)
+                val title = poster.title
+                val isUnwanted = title.contains("هورتون") ||
+                        title.contains("ملودی باکس") ||
+                        title.contains("بروزرسانی نسخه ویندوز") ||
+                        title.contains("آموزش زبان به سبک مووی باکس")
+                if (!isUnwanted) {
+                    posters.add(poster)
+                }
             } catch (_: Exception) {
                 continue
             }

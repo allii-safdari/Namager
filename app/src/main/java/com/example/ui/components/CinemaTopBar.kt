@@ -90,7 +90,7 @@ fun CinemaTopBar(
             }
         },
         actions = {
-            IconButton(
+         /*   IconButton(
                 onClick = onSearchClick,
                 modifier = Modifier
                     .testTag("topbar_search_btn")
@@ -103,7 +103,7 @@ fun CinemaTopBar(
                     tint = TextPrimary,
                     modifier = Modifier.size(20.dp)
                 )
-            }
+            }*/
         }
     )
 }

@@ -1,5 +1,6 @@
 package com.example
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -15,7 +16,6 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -56,6 +56,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
 fun CinematicApp(
     viewModel: CinemaViewModel = hiltViewModel()
@@ -86,7 +87,7 @@ fun CinematicApp(
         MovieDetailSheet(
             media = selectedMedia!!,
             viewModel = viewModel,
-            isWatchlisted = viewModel.isFavorite(selectedMedia!!.id),
+            isWatchlist = viewModel.isFavorite(selectedMedia!!.id),
             onClose = { viewModel.selectMedia(null) }
         )
         return
@@ -113,9 +114,9 @@ fun CinematicApp(
                         .weight(1f)
                         .fillMaxHeight()
                 ) {
-                    CinemaTopBar(
+                    /*CinemaTopBar(
                         onSearchClick = { viewModel.setTab(ScreenTab.SEARCH) }
-                    )
+                    )*/
 
                     AnimatedTabContent(
                         currentTab = currentTab,
@@ -132,9 +133,9 @@ fun CinematicApp(
                     .testTag("cinematic_main_scaffold"),
                 containerColor = DarkBackground,
                 topBar = {
-                    CinemaTopBar(
+                 /*   CinemaTopBar(
                         onSearchClick = { viewModel.setTab(ScreenTab.SEARCH) }
-                    )
+                    )*/
                 },
                 bottomBar = {
                     CinemaBottomNavigationBar(
@@ -172,7 +173,8 @@ private fun AnimatedTabContent(
                 ScreenTab.MOVIES -> {
                     MoviesScreen(
                         viewModel = viewModel,
-                        onMediaClick = { viewModel.selectMedia(it) }
+                        onMediaClick = { viewModel.selectMedia(it) },
+                        onSearchClick = { viewModel.setTab(ScreenTab.SEARCH) }
                     )
                 }
                 ScreenTab.SERIES -> {

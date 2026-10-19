@@ -1,35 +1,42 @@
 package com.example.ui.components
 
-import androidx.compose.foundation.BorderStroke
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.BookmarkBorder
-import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.material.icons.outlined.CalendarToday
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
 import com.example.R
 import com.example.data.model.UnifiedMedia
 import com.example.ui.theme.*
+import java.util.Locale
 
 @Composable
 fun UnifiedHeroBanner(
@@ -40,218 +47,174 @@ fun UnifiedHeroBanner(
     onToggleWatchlist: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Card(
+    val imageUrl = remember(media.cover, media.image) {
+        if (media.cover.isNotEmpty()) media.cover else media.image
+    }
+
+    Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(380.dp)
-            .testTag("unified_hero_banner_${media.id}"),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = DarkSurface),
-        border = BorderStroke(1.dp, GlassBorder)
+            .aspectRatio(1f) // نسبت پوستر در تصویر نمونه
+            .clickable { onWatchClick(media) }
+            .testTag("unified_hero_banner_${media.id}")
     ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            val imageUrl = if (media.cover.isNotEmpty()) media.cover else media.image
-            CinematicPosterImage(
-                imageUrl = imageUrl,
-                contentDescription = media.title,
-                modifier = Modifier.fillMaxSize(),
-                shape = RoundedCornerShape(24.dp),
-                contentScale = ContentScale.Crop
-            )
+        // پوستر تمام‌عرض
+        CinematicPosterImage(
+            imageUrl = imageUrl,
+            contentDescription = media.title,
+            modifier = Modifier.fillMaxSize(),
+            shape = RectangleShape,
+            contentScale = ContentScale.Crop,
+            alignment = Alignment.TopCenter // چهره‌ها بریده نشوند
 
-            // Dark Multi-Stop Gradient Overlays
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        Brush.verticalGradient(
-                            colors = listOf(
-                                Color(0x550F0F14),
-                                Color(0x880F0F14),
-                                Color(0xF20F0F14),
-                                DarkBackground
-                            )
+        )
+
+        // گرادیان پایین که در رنگ پس‌زمینه‌ی صفحه محو می‌شود
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .fillMaxHeight(0.55f)
+                .background(
+                    Brush.verticalGradient(
+                        colorStops = arrayOf(
+                            0.0f to Color.Transparent,
+                            0.5f to Color(0x990F0F14),
+                            0.8f to Color(0xF20F0F14),
+                            1.0f to DarkBackground
                         )
                     )
+                )
+        )
+
+        // عنوان و اطلاعات (وسط‌چین)
+        Column(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+                .padding(bottom = 56.dp), // فضای اندیکاتور
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = media.title,
+                style = MaterialTheme.typography.headlineMedium,
+                color = TextPrimary,
+                fontSize = 28.sp,
+                fontWeight = FontWeight.ExtraBold,
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
 
-            // Content Column
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(20.dp),
-                verticalArrangement = Arrangement.Bottom
-            ) {
-                // Media Type Tag
-                Surface(
-                    shape = RoundedCornerShape(12.dp),
-                    color = if (media.isSeries) CinemaRed.copy(alpha = 0.3f) else CinemaGold.copy(alpha = 0.2f),
-                    border = BorderStroke(1.dp, if (media.isSeries) CinemaRed else CinemaGold.copy(alpha = 0.6f)),
-                    modifier = Modifier.padding(bottom = 8.dp)
-                ) {
-                    Text(
-                        text = if (media.isSeries) "سریال اختصاصی" else "فیلم سینمایی برگزیده",
-                        color = if (media.isSeries) Color(0xFFFF8A80) else CinemaGoldLight,
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
-                    )
-                }
+            if (media.imdb > 0 || media.year > 0) {
+                Spacer(modifier = Modifier.height(12.dp))
 
-                // Title
-                Text(
-                    text = media.title,
-                    style = MaterialTheme.typography.headlineLarge,
-                    color = TextPrimary,
-                    fontWeight = FontWeight.ExtraBold,
-                    maxLines = 1
-                )
-
-                // Genres line
-                if (media.genres.isNotEmpty()) {
-                    Text(
-                        text = media.genres.joinToString(" • ") { it.title },
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = TextSecondary,
-                        modifier = Modifier.padding(top = 2.dp, bottom = 8.dp)
-                    )
-                }
-
-                // Badges Row
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.padding(bottom = 14.dp)
-                ) {
-                    if (media.imdb > 0) {
-                        Surface(
-                            shape = RoundedCornerShape(6.dp),
-                            color = Color(0xCC000000),
-                            border = BorderStroke(0.5.dp, CinemaGold)
-                        ) {
+                // ترتیب ثابت: IMDb سمت چپ، سال سمت راست (مستقل از RTL)
+                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(20.dp)
+                    ) {
+                        if (media.imdb > 0) {
                             Row(
-                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                                verticalAlignment = Alignment.CenterVertically
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Image(
+                                    painter = painterResource(R.drawable.imdb_logo),
+                                    contentDescription = "IMDb",
+                                    modifier = Modifier.height(22.dp)
+                                )
+                                Text(
+                                    text = buildAnnotatedString {
+                                        withStyle(
+                                            SpanStyle(
+                                                color = TextPrimary,
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 16.sp
+                                            )
+                                        ) {
+                                            append(String.format(Locale.US, "%.1f", media.imdb))
+                                        }
+                                        withStyle(
+                                            SpanStyle(
+                                                color = TextSecondary,
+                                                fontWeight = FontWeight.Normal,
+                                                fontSize = 16.sp
+                                            )
+                                        ) {
+                                            append("/10")
+                                        }
+                                    }
+                                )
+                            }
+                        }
+
+                        if (media.year > 0) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 Icon(
-                                    imageVector = Icons.Default.Star,
+                                    imageVector = Icons.Outlined.CalendarToday,
                                     contentDescription = null,
-                                    tint = CinemaGold,
-                                    modifier = Modifier.size(14.dp)
+                                    tint = TextPrimary,
+                                    modifier = Modifier.size(22.dp)
                                 )
-                                Spacer(modifier = Modifier.width(4.dp))
                                 Text(
-                                    text = String.format("%.1f", media.imdb),
+                                    text = media.year.toString(),
                                     color = TextPrimary,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    fontWeight = FontWeight.Bold
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Medium
                                 )
                             }
                         }
                     }
-
-                    if (media.year > 0) {
-                        Surface(
-                            shape = RoundedCornerShape(6.dp),
-                            color = DarkSurfaceHighlight
-                        ) {
-                            Text(
-                                text = "${media.year}",
-                                color = TextSecondary,
-                                style = MaterialTheme.typography.labelSmall,
-                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                            )
-                        }
-                    }
-
-                    if (media.duration != null) {
-                        Surface(
-                            shape = RoundedCornerShape(6.dp),
-                            color = DarkSurfaceHighlight
-                        ) {
-                            Text(
-                                text = media.duration,
-                                color = TextSecondary,
-                                style = MaterialTheme.typography.labelSmall,
-                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                            )
-                        }
-                    }
-                }
-
-                // Action Buttons Row
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // Play Button
-                    Button(
-                        onClick = { onWatchClick(media) },
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(48.dp)
-                            .testTag("hero_watch_btn_${media.id}"),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = CinemaGold,
-                            contentColor = Color(0xFF1A1400)
-                        ),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.PlayArrow,
-                            contentDescription = null,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = "پخش و تماشا",
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-
-                    // Details Button
-                    FilledTonalButton(
-                        onClick = { onDetailsClick(media) },
-                        modifier = Modifier
-                            .height(48.dp)
-                            .testTag("hero_details_btn_${media.id}"),
-                        colors = ButtonDefaults.filledTonalButtonColors(
-                            containerColor = Color(0x33FFFFFF),
-                            contentColor = TextPrimary
-                        ),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Info,
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = "اطلاعات کامل",
-                            style = MaterialTheme.typography.labelMedium
-                        )
-                    }
-
-                    // Bookmark Button
-                    IconButton(
-                        onClick = { onToggleWatchlist(media.id) },
-                        modifier = Modifier
-                            .size(48.dp)
-                            .testTag("hero_bookmark_btn_${media.id}")
-                            .background(Color(0x33FFFFFF), RoundedCornerShape(12.dp))
-                    ) {
-                        Icon(
-                            imageVector = if (isWatchlisted) Icons.Default.Bookmark else Icons.Outlined.BookmarkBorder,
-                            contentDescription = "Bookmark",
-                            tint = if (isWatchlisted) CinemaGold else TextPrimary,
-                            modifier = Modifier.size(22.dp)
-                        )
-                    }
                 }
             }
         }
+    }
+}
+
+/** نقاط اسلایدر؛ آیتم فعال به شکل قرص کشیده نمایش داده می‌شود. */
+@Composable
+fun HeroPagerIndicator(
+    pageCount: Int,
+    currentPage: Int,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        repeat(pageCount) { index ->
+            val selected = index == currentPage
+            val width by animateDpAsState(
+                targetValue = if (selected) 20.dp else 8.dp,
+                label = "dot_width"
+            )
+            Box(
+                modifier = Modifier
+                    .height(8.dp)
+                    .width(width)
+                    .clip(CircleShape)
+                    .background(if (selected) Color.White else Color.White.copy(alpha = 0.9f))
+            )
+        }
+    }
+}
+
+/**
+ * آیتم را از padding کناری گرید بیرون می‌برد تا بنر تمام‌عرض شود.
+ * [horizontal] باید برابر contentPadding افقی گرید باشد.
+ */
+fun Modifier.fullBleed(horizontal: Dp): Modifier = layout { measurable, constraints ->
+    val extra = horizontal.roundToPx() * 2
+    val width = constraints.maxWidth + extra
+    val placeable = measurable.measure(constraints.copy(minWidth = width, maxWidth = width))
+    layout(constraints.maxWidth, placeable.height) {
+        placeable.place(-extra / 2, 0)
     }
 }

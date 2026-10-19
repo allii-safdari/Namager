@@ -32,7 +32,7 @@ object PersianUtils {
         // If it's already localized or text, format numbers
         val persianNum = toPersianDigits(clean)
         return if (!persianNum.contains("دقیقه") && !persianNum.contains("ساعت")) {
-            "$persianNum دقیقه"
+            persianNum
         } else {
             persianNum
         }

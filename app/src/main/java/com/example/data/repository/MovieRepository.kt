@@ -20,7 +20,15 @@ class MovieRepository @Inject constructor() : BaseRepository(), IMovieRepository
         for (i in 0 until jsonArray.length()) {
             try {
                 val movieObj = jsonArray.getJSONObject(i)
-                movies.add(parseMovie(movieObj))
+                val movie = parseMovie(movieObj)
+                val title = movie.title
+                val isUnwanted = title.contains("هورتون") ||
+                        title.contains("ملودی باکس") ||
+                        title.contains("بروز رسانی نسخه ویندوز") ||
+                        title.contains("آموزش زبان به سبک مووی باکس")
+                if (!isUnwanted) {
+                    movies.add(movie)
+                }
             } catch (_: Exception) {
                 continue
             }

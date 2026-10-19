@@ -49,22 +49,7 @@ fun ExpandableText(
                 }
             )
 
-            // Copy icon
-            IconButton(
-                onClick = {
-                    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                    val clip = ClipData.newPlainText("Description", text)
-                    clipboard.setPrimaryClip(clip)
-                    Toast.makeText(context, "متن خلاصه کپی شد", Toast.LENGTH_SHORT).show()
-                },
-                modifier = Modifier.padding(start = 8.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.ContentCopy,
-                    contentDescription = "Copy description",
-                    tint = CinemaGold
-                )
-            }
+
         }
 
         if (showReadMore || expanded) {

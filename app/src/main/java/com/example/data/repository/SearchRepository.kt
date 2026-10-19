@@ -31,7 +31,15 @@ class SearchRepository @Inject constructor() : BaseRepository(), ISearchReposito
         for (i in 0 until postersArray.length()) {
             try {
                 val posterObj = postersArray.getJSONObject(i)
-                posters.add(parsePoster(posterObj))
+                val poster = parsePoster(posterObj)
+                val title = poster.title
+                val isUnwanted = title.contains("هورتون") ||
+                        title.contains("ملودی باکس") ||
+                        title.contains("بروزرسانی نسخه ویندوز") ||
+                        title.contains("آموزش زبان به سبک مووی باکس")
+                if (!isUnwanted) {
+                    posters.add(poster)
+                }
             } catch (_: Exception) {
                 continue
             }

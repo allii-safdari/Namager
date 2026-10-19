@@ -32,9 +32,9 @@ import com.example.ui.theme.TextSecondary
 @Composable
 fun GenreFilterSection(
     genres: List<Genre>,
-    selectedGenreId: Int,
+    selectedGenreId: Int?,
     selectedOrder: FilterOrder,
-    onGenreSelected: (Int) -> Unit,
+    onGenreSelected: (Int?) -> Unit,
     onOrderSelected: (FilterOrder) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -104,8 +104,7 @@ fun GenreFilterSection(
         }
 
         // Genres horizontal list (sorted by title with "همه" first)
-        val sortedGenres = listOf(Genre(0, "همه ژانرها")) + genres.filter { it.id != 0 }.sortedBy { it.title }
-
+        val sortedGenres = genres.filter { it.id != 0 }.sortedBy { it.title }
         LazyRow(
             modifier = Modifier
                 .fillMaxWidth()
@@ -117,7 +116,7 @@ fun GenreFilterSection(
                 val isSelected = (genre.id == selectedGenreId)
                 FilterChip(
                     selected = isSelected,
-                    onClick = { onGenreSelected(genre.id) },
+                    onClick = { onGenreSelected(if (isSelected) null else genre.id) },
                     label = {
                         Text(
                             text = genre.title,

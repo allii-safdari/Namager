@@ -70,12 +70,6 @@ fun SearchScreen(
         // Search Input Header
         item {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text(
-                    text = "کاوش و جستجو",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = TextPrimary
-                )
 
                 // Search Box with Action Button
                 Row(
@@ -87,7 +81,8 @@ fun SearchScreen(
                         value = searchQuery,
                         onValueChange = { viewModel.updateSearchQuery(it) },
                         modifier = Modifier
-                            .weight(1f)
+
+                            .fillMaxWidth()
                             .testTag("search_text_field"),
                         placeholder = {
                             Text(
@@ -117,7 +112,7 @@ fun SearchScreen(
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                         keyboardActions = KeyboardActions(onSearch = { viewModel.executeSearch() }),
-                        shape = RoundedCornerShape(50.dp),
+                      //  shape = RoundedCornerShape(32.dp),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedContainerColor = DarkSurface,
                             unfocusedContainerColor = DarkSurface,
@@ -127,22 +122,6 @@ fun SearchScreen(
                             unfocusedTextColor = TextPrimary
                         )
                     )
-
-                    Button(
-                        onClick = { viewModel.executeSearch() },
-                        modifier = Modifier
-                            .height(54.dp)
-                            .testTag("search_submit_button"),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = MaterialTheme.colorScheme.onPrimary
-                        ),
-                        shape = RoundedCornerShape(50.dp)
-                    ) {
-                        Icon(imageVector = Icons.Default.Search, contentDescription = null)
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("جستجو", fontWeight = FontWeight.Bold)
-                    }
                 }
 
                 // Quick Topic/Genre Suggestion Chips
