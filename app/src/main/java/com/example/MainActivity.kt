@@ -2,11 +2,9 @@ package com.example
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.os.SystemClock
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -17,17 +15,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Bookmarks
-import androidx.compose.material.icons.filled.Movie
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Tv
-import androidx.compose.material.icons.outlined.Bookmarks
-import androidx.compose.material.icons.outlined.Movie
-import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material.icons.outlined.Tv
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Icon
@@ -42,13 +29,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -71,9 +57,7 @@ import com.example.ui.util.PersianUtils
 import com.example.ui.viewmodel.AppViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import com.example.ui.NamagerSplashScreen
-import kotlinx.coroutines.delay
-import java.util.concurrent.TimeUnit
+import com.example.ui.navigation.destinations
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -121,7 +105,7 @@ fun CinematicApp(
     BoxWithConstraints(
         modifier = modifier
             .fillMaxSize()
-            .background(DarkBackground)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         val useRail = maxWidth >= 720.dp && showNavigation
 
@@ -145,7 +129,7 @@ fun CinematicApp(
                 )
 
                 if (showNavigation && !useRail) {
-                    CinemaBottomNavigationBar(
+                    NamagerBottomNavigationBar(
                         currentRoute = currentRoute,
                         favoriteCount = favoriteCount,
                         onSelect = { navController.navigateTopLevel(it) },
@@ -157,48 +141,10 @@ fun CinematicApp(
     }
 }
 
-private data class TopLevelDestination(
-    val route: String,
-    @param:StringRes val labelRes: Int,
-    val selectedIcon: ImageVector,
-    val unselectedIcon: ImageVector
-)
 
-private val destinations = listOf(
-    TopLevelDestination(
-        route = AppRoutes.MOVIES,
-        labelRes = R.string.nav_movies,
-        selectedIcon = Icons.Filled.Movie,
-        unselectedIcon = Icons.Outlined.Movie
-    ),
-    TopLevelDestination(
-        route = AppRoutes.SERIES,
-        labelRes = R.string.nav_series,
-        selectedIcon = Icons.Filled.Tv,
-        unselectedIcon = Icons.Outlined.Tv
-    ),
-    TopLevelDestination(
-        route = AppRoutes.SEARCH,
-        labelRes = R.string.nav_search,
-        selectedIcon = Icons.Filled.Search,
-        unselectedIcon = Icons.Outlined.Search
-    ),
-    TopLevelDestination(
-        route = AppRoutes.FAVORITES,
-        labelRes = R.string.nav_favorites,
-        selectedIcon = Icons.Filled.Bookmarks,
-        unselectedIcon = Icons.Outlined.Bookmarks
-    ),
-    TopLevelDestination(
-        route = AppRoutes.SETTINGS,
-        labelRes = R.string.nav_settings,
-        selectedIcon = Icons.Filled.Settings,
-        unselectedIcon = Icons.Outlined.Settings
-    )
-)
 
 @Composable
-fun CinemaBottomNavigationBar(
+fun NamagerBottomNavigationBar(
     currentRoute: String?,
     favoriteCount: Int,
     onSelect: (String) -> Unit,
@@ -206,7 +152,6 @@ fun CinemaBottomNavigationBar(
 ) {
     NavigationBar(
         modifier = modifier
-            .windowInsetsPadding(WindowInsets.navigationBars)
             .testTag("cinema_bottom_nav_bar"),
        // containerColor = DarkSurface,
         tonalElevation = 8.dp
@@ -277,10 +222,10 @@ fun CinemaNavigationRail(
     NavigationRail(
         modifier = modifier
             .fillMaxHeight()
-            .statusBarsPadding()
-            .windowInsetsPadding(WindowInsets.navigationBars)
+            //.statusBarsPadding()
+          //  .windowInsetsPadding(WindowInsets.navigationBars)
             .testTag("cinema_navigation_rail"),
-        containerColor = DarkSurface
+        //containerColor = DarkSurface
     ) {
         destinations.forEach { destination ->
             val selected = currentRoute == destination.route
