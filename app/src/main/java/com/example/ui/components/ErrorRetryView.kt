@@ -17,8 +17,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.R
-import com.example.ui.theme.CinemaGold
-import com.example.ui.theme.CinemaRed
+import com.example.ui.theme.FlameLight
+import com.example.ui.theme.Flame
 import com.example.ui.theme.TextPrimary
 import com.example.ui.theme.TextSecondary
 
@@ -42,7 +42,7 @@ fun ErrorRetryView(
             Icon(
                 imageVector = Icons.Default.CloudOff,
                 contentDescription = null,
-                tint = CinemaRed,
+                tint = Flame,
                 modifier = Modifier.size(56.dp)
             )
 
@@ -56,7 +56,7 @@ fun ErrorRetryView(
             Button(
                 onClick = onRetry,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = CinemaGold,
+                    containerColor = FlameLight,
                     contentColor = Color.Black
                 ),
                 shape = RoundedCornerShape(50.dp),

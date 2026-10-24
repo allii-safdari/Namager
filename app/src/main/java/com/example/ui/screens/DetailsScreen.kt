@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -55,6 +54,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -89,9 +89,9 @@ import com.example.ui.components.EmptyStateView
 import com.example.ui.components.ErrorRetryView
 import com.example.ui.components.ExpandableText
 import com.example.ui.components.QualitySelectionSheet
-import com.example.ui.theme.CinemaGold
+import com.example.ui.theme.FlameLight
 import com.example.ui.theme.CinemaGoldDark
-import com.example.ui.theme.CinemaRed
+import com.example.ui.theme.Flame
 import com.example.ui.theme.DarkBackground
 import com.example.ui.theme.DarkSurface
 import com.example.ui.theme.DarkSurfaceHighlight
@@ -124,7 +124,7 @@ fun DetailsScreen(
         when {
             state.isLoading -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = CinemaGold)
+                    CircularProgressIndicator(color = FlameLight)
                 }
             }
 
@@ -215,8 +215,15 @@ private fun MediaDetailsContent(
 
             PrimaryTabRow(
                 selectedTabIndex = selectedTab,
-                containerColor = DarkSurface,
-                contentColor = CinemaGold,
+                /*containerColor = DarkSurface,
+                contentColor = FlameLight,*/
+//                indicator = {
+//                    TabRowDefaults.PrimaryIndicator(
+//                        modifier = Modifier
+//                            .tabIndicatorOffset(selectedTab),
+//                        color = Flame
+//                    )
+//                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
@@ -241,7 +248,7 @@ private fun MediaDetailsContent(
                                 modifier = Modifier.size(18.dp)
                             )
                         },
-                        selectedContentColor = CinemaGold,
+                        selectedContentColor = Color.White,
                         unselectedContentColor = TextSecondary,
                         modifier = Modifier.testTag("detail_tab_$index")
                     )
@@ -290,8 +297,8 @@ private fun MediaDetailsContent(
                             Text(
                                 text = "مشخصات و اطلاعات اثر",
                                 style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = CinemaGold
+                                fontWeight = FontWeight.SemiBold,
+                                color = FlameLight
                             )
                             HorizontalDivider(thickness = 0.5.dp, color = GlassBorder)
                             SpecificationRow("نام اثر", media.title)
@@ -493,7 +500,7 @@ private fun MediaDetailsContent(
                             Icon(
                                 imageVector = Icons.Default.BookmarkAdd,
                                 contentDescription = null,
-                                tint = CinemaGold
+                                tint = Flame
                             )
                         }
                     }
@@ -501,7 +508,7 @@ private fun MediaDetailsContent(
             },
             confirmButton = {
                 TextButton(onClick = { showGroupPicker = false }) {
-                    Text("بستن", color = CinemaGold)
+                    Text("بستن")
                 }
             },
             containerColor = DarkSurface,
@@ -612,7 +619,7 @@ private fun DetailsHeader(
                 Icon(
                     imageVector = if (isFavorite) Icons.Default.Bookmark else Icons.Outlined.BookmarkBorder,
                     contentDescription = if (isFavorite) "حذف از علاقه‌مندی‌ها" else "افزودن به علاقه‌مندی‌ها",
-                    tint = if (isFavorite) CinemaGold else Color.White
+                    tint = if (isFavorite) FlameLight else Color.White
                 )
             }
         }
@@ -660,7 +667,7 @@ private fun DetailsHeader(
                 ) {
                     Surface(
                         shape = RoundedCornerShape(6.dp),
-                        color = if (media.isSeries) CinemaRed else CinemaGoldDark
+                        color = Flame
                     ) {
                         Text(
                             text = if (media.isSeries) "سریال" else "فیلم سینمایی",
@@ -685,7 +692,7 @@ private fun DetailsHeader(
                                 Icon(
                                     imageVector = Icons.Default.Star,
                                     contentDescription = null,
-                                    tint = CinemaGold,
+                                    tint = FlameLight,
                                     modifier = Modifier.size(14.dp)
                                 )
                                 Text(
@@ -699,7 +706,11 @@ private fun DetailsHeader(
                     }
                 }
 
-                PersianUtils.formatDuration(media.duration)?.let { durationText ->
+                PersianUtils.formatDuration(media.duration)?.let { text ->
+
+                    /*val durationText = text
+                        .replace("min", "") // تغییر "دقیقه" به "د"
+                        .trim()*/
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
@@ -707,11 +718,11 @@ private fun DetailsHeader(
                         Icon(
                             imageVector = Icons.Default.Schedule,
                             contentDescription = null,
-                            tint = TextTertiary,
+                            tint = FlameLight,
                             modifier = Modifier.size(14.dp)
                         )
                         Text(
-                            text = durationText,
+                            text = text,
                             style = MaterialTheme.typography.bodySmall,
                             color = TextSecondary
                         )
@@ -739,7 +750,7 @@ private fun MoviePlaySection(
                 .padding(horizontal = 16.dp),
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(containerColor = DarkSurfaceHighlight),
-            border = BorderStroke(1.5.dp, CinemaGold)
+            border = BorderStroke(1.5.dp, Flame)
         ) {
             Column(
                 modifier = Modifier.padding(16.dp),
@@ -757,7 +768,7 @@ private fun MoviePlaySection(
                         .fillMaxWidth()
                         .height(48.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = CinemaGold,
+                        containerColor = Flame,
                         contentColor = Color.Black
                     ),
                     shape = RoundedCornerShape(12.dp)
@@ -817,7 +828,7 @@ private fun MovieDownloadSection(
                 Icon(
                     imageVector = Icons.Default.CloudDownload,
                     contentDescription = null,
-                    tint = CinemaGold,
+                    tint = FlameLight,
                     modifier = Modifier.size(24.dp)
                 )
                 Text(
@@ -846,8 +857,8 @@ private fun SeasonTabsRow(
 ) {
     ScrollableTabRow(
         selectedTabIndex = selectedIndex,
-        containerColor = DarkSurface,
-        contentColor = CinemaGold,
+        /*containerColor = DarkSurface,
+        contentColor = FlameLight,*/
         edgePadding = 16.dp,
         modifier = Modifier
             .fillMaxWidth()
@@ -881,7 +892,7 @@ private fun SectionTitle(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Icon(icon, contentDescription = null, tint = CinemaGold, modifier = Modifier.size(20.dp))
+        Icon(icon, contentDescription = null, tint = Flame, modifier = Modifier.size(20.dp))
         Text(
             text = title,
             style = MaterialTheme.typography.titleMedium,
@@ -920,7 +931,7 @@ private fun LoadingCard() {
             .padding(32.dp),
         contentAlignment = Alignment.Center
     ) {
-        CircularProgressIndicator(color = CinemaGold)
+        CircularProgressIndicator(color = FlameLight)
     }
 }
 
@@ -948,9 +959,9 @@ private fun PlaySourceCard(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Surface(
+                /*Surface(
                     shape = RoundedCornerShape(8.dp),
-                    color = CinemaGold
+                    color = DarkSurfaceVariant
                 ) {
                     Text(
                         text = source.quality,
@@ -959,7 +970,7 @@ private fun PlaySourceCard(
                         style = MaterialTheme.typography.labelMedium,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                     )
-                }
+                }*/
                 Column {
                     Text(
                         text = "کیفیت ${source.quality}",
@@ -978,8 +989,8 @@ private fun PlaySourceCard(
             FilledTonalButton(
                 onClick = onPlayClick,
                 colors = ButtonDefaults.filledTonalButtonColors(
-                    containerColor = Color(0x33FFB74D),
-                    contentColor = CinemaGold
+                    containerColor = Flame.copy(.50f),
+                    contentColor = Color.White
                 ),
                 shape = RoundedCornerShape(8.dp),
                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
@@ -1017,13 +1028,13 @@ private fun DownloadSourceCard(
             ) {
                 Surface(
                     shape = RoundedCornerShape(8.dp),
-                    color = CinemaRed
+                    color = DarkSurfaceVariant
                 ) {
                     Text(
                         text = source.quality,
                         color = Color.White,
                         fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.labelMedium,
+                        style = MaterialTheme.typography.labelSmall,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                     )
                 }
@@ -1037,10 +1048,12 @@ private fun DownloadSourceCard(
                 }
             }
 
-            Button(
-                modifier = Modifier.wrapContentWidth(),
+            FilledTonalButton(
                 onClick = onDownloadClick,
-                colors = ButtonDefaults.buttonColors(containerColor = CinemaRed),
+                colors = ButtonDefaults.filledTonalButtonColors(
+                    containerColor = Flame.copy(.50f),
+                    contentColor = Color.White
+                ),
                 shape = RoundedCornerShape(8.dp),
                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
             ) {
@@ -1048,6 +1061,7 @@ private fun DownloadSourceCard(
                 Spacer(Modifier.width(4.dp))
                 Text("دانلود", fontSize = 12.sp, fontWeight = FontWeight.Bold)
             }
+
         }
     }
 }
@@ -1186,7 +1200,7 @@ private fun EpisodeDownloadItem(
 
             Button(
                 onClick = onDownloadClick,
-                colors = ButtonDefaults.buttonColors(containerColor = CinemaRed),
+                colors = ButtonDefaults.buttonColors(containerColor = Flame),
                 shape = RoundedCornerShape(8.dp),
                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
             ) {

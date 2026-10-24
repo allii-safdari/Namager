@@ -228,7 +228,7 @@ fun ExoPlayerView(
         // Buffering Indicator
         if (isBuffering && playbackError == null) {
             CircularProgressIndicator(
-                color = CinemaGold,
+                color = FlameLight,
                 modifier = Modifier
                     .size(56.dp)
                     .align(Alignment.Center)
@@ -252,7 +252,7 @@ fun ExoPlayerView(
                     Icon(
                         imageVector = Icons.Default.ErrorOutline,
                         contentDescription = "Error",
-                        tint = CinemaRed,
+                        tint = Flame,
                         modifier = Modifier.size(48.dp)
                     )
                     Text(
@@ -270,7 +270,7 @@ fun ExoPlayerView(
                             }
                             exoPlayer.play()
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = CinemaGold, contentColor = Color.Black),
+                        colors = ButtonDefaults.buttonColors(containerColor = FlameLight, contentColor = Color.Black),
                         shape = RoundedCornerShape(50.dp)
                     ) {
                         Icon(imageVector = Icons.Default.Refresh, contentDescription = null)
@@ -338,7 +338,7 @@ fun ExoPlayerView(
                             Text(
                                 text = subtitle,
                                 style = MaterialTheme.typography.bodySmall,
-                                color = CinemaGold,
+                                color = FlameLight,
                                 maxLines = 1
                             )
                         }
@@ -351,7 +351,7 @@ fun ExoPlayerView(
                             contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
                             colors = ButtonDefaults.filledTonalButtonColors(
                                 containerColor = Color(0x55000000),
-                                contentColor = CinemaGold
+                                contentColor = FlameLight
                             )
                         ) {
                             Text("${PersianUtils.toPersianDigits(currentSpeed)}x", fontSize = 12.sp, fontWeight = FontWeight.Bold)
@@ -413,7 +413,7 @@ fun ExoPlayerView(
                         },
                         modifier = Modifier
                             .size(68.dp)
-                            .background(CinemaGold, CircleShape)
+                            .background(FlameLight, CircleShape)
                     ) {
                         Icon(
                             imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
@@ -479,8 +479,8 @@ fun ExoPlayerView(
                             currentPosition = targetMs
                         },
                         colors = SliderDefaults.colors(
-                            thumbColor = CinemaGold,
-                            activeTrackColor = CinemaRed,
+                            thumbColor = FlameLight,
+                            activeTrackColor = Flame,
                             inactiveTrackColor = Color(0x66FFFFFF)
                         ),
                         modifier = Modifier.fillMaxWidth()
@@ -495,12 +495,12 @@ fun ExoPlayerView(
                         Surface(
                             shape = RoundedCornerShape(8.dp),
                             color = Color(0x44FFB74D),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, CinemaGold)
+                            border = androidx.compose.foundation.BorderStroke(1.dp, FlameLight)
                         ) {
                             Text(
                                 text = "کیفیت ${source.quality} • ${source.type.uppercase()}",
                                 style = MaterialTheme.typography.labelSmall,
-                                color = CinemaGold,
+                                color = FlameLight,
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                                 fontWeight = FontWeight.Bold
                             )
@@ -535,11 +535,11 @@ fun ExoPlayerView(
                         ) {
                             Text(
                                 text = "${PersianUtils.toPersianDigits(speed)} برابر",
-                                color = if (isSelected) CinemaGold else TextPrimary,
+                                color = if (isSelected) FlameLight else TextPrimary,
                                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
                             )
                             if (isSelected) {
-                                Icon(Icons.Default.Check, contentDescription = null, tint = CinemaGold)
+                                Icon(Icons.Default.Check, contentDescription = null, tint = FlameLight)
                             }
                         }
                     }
@@ -565,12 +565,12 @@ fun ExoPlayerView(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Text("صدا (Audio)", style = MaterialTheme.typography.titleSmall, color = CinemaGold)
+                    Text("صدا (Audio)", style = MaterialTheme.typography.titleSmall, color = FlameLight)
                     Text("کانال صوتی پیش‌فرض استریم", style = MaterialTheme.typography.bodySmall, color = TextSecondary)
 
                     HorizontalDivider(color = Color(0x33FFFFFF))
 
-                    Text("زیرنویس (Subtitles)", style = MaterialTheme.typography.titleSmall, color = CinemaGold)
+                    Text("زیرنویس (Subtitles)", style = MaterialTheme.typography.titleSmall, color = FlameLight)
                     val tracks = currentTracks
                     var textTracksFound = false
                     if (tracks != null) {
@@ -595,8 +595,8 @@ fun ExoPlayerView(
                                             .padding(8.dp),
                                         horizontalArrangement = Arrangement.SpaceBetween
                                     ) {
-                                        Text(text = trackName, color = if (isSelected) CinemaGold else TextPrimary)
-                                        if (isSelected) Icon(Icons.Default.Check, contentDescription = null, tint = CinemaGold)
+                                        Text(text = trackName, color = if (isSelected) FlameLight else TextPrimary)
+                                        if (isSelected) Icon(Icons.Default.Check, contentDescription = null, tint = FlameLight)
                                     }
                                 }
                             }

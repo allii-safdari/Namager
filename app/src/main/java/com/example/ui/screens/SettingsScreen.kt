@@ -10,15 +10,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -62,8 +59,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.BuildConfig
 import com.example.domain.model.ThemeMode
-import com.example.ui.theme.CinemaGold
-import com.example.ui.theme.CinemaRed
+import com.example.ui.theme.FlameLight
+import com.example.ui.theme.Flame
 import com.example.ui.theme.DarkSurface
 import com.example.ui.theme.TextPrimary
 import com.example.ui.theme.TextSecondary
@@ -192,7 +189,7 @@ fun SettingsScreen(
                         icon = Icons.Default.RestartAlt,
                         title = "بازنشانی تنظیمات",
                         subtitle = "بازگشت همه تنظیمات به حالت پیش‌فرض",
-                        tint = CinemaRed,
+                        tint = Flame,
                         onClick = { showResetDialog = true }
                     )
 
@@ -236,9 +233,9 @@ fun SettingsScreen(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(mode.titleFa, color = if (isSelected) CinemaGold else TextPrimary)
+                            Text(mode.titleFa, color = if (isSelected) FlameLight else TextPrimary)
                             if (isSelected) {
-                                Icon(Icons.Default.Check, contentDescription = null, tint = CinemaGold)
+                                Icon(Icons.Default.Check, contentDescription = null, tint = FlameLight)
                             }
                         }
                     }
@@ -274,10 +271,10 @@ fun SettingsScreen(
                         ) {
                             Text(
                                 "±${PersianUtils.toPersianDigits(seconds)} ثانیه",
-                                color = if (isSelected) CinemaGold else TextPrimary
+                                color = if (isSelected) FlameLight else TextPrimary
                             )
                             if (isSelected) {
-                                Icon(Icons.Default.Check, contentDescription = null, tint = CinemaGold)
+                                Icon(Icons.Default.Check, contentDescription = null, tint = FlameLight)
                             }
                         }
                     }
@@ -308,8 +305,8 @@ fun SettingsScreen(
                         valueRange = 12f..32f,
                         steps = 9,
                         colors = SliderDefaults.colors(
-                            thumbColor = CinemaGold,
-                            activeTrackColor = CinemaGold
+                            thumbColor = FlameLight,
+                            activeTrackColor = FlameLight
                         )
                     )
                     Box(
@@ -335,7 +332,7 @@ fun SettingsScreen(
                         showSubtitleDialog = false
                     },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = CinemaGold,
+                        containerColor = FlameLight,
                         contentColor = Color.Black
                     )
                 ) {
@@ -362,7 +359,7 @@ fun SettingsScreen(
                         showResetDialog = false
                     },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = CinemaRed,
+                        containerColor = Flame,
                         contentColor = Color.White
                     )
                 ) {
@@ -391,7 +388,7 @@ fun SettingsScreen(
                 Button(
                     onClick = { showUpdateDialog = false },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = CinemaGold,
+                        containerColor = FlameLight,
                         contentColor = Color.Black
                     )
                 ) {
@@ -459,7 +456,7 @@ private fun SettingsSection(
                 text = title,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = CinemaGold
+                color = FlameLight
             )
             content()
         }
@@ -472,7 +469,7 @@ private fun SettingsRow(
     title: String,
     subtitle: String,
     onClick: () -> Unit,
-    tint: Color = CinemaGold
+    tint: Color = FlameLight
 ) {
     Row(
         modifier = Modifier
@@ -501,10 +498,3 @@ private fun SettingsRow(
     }
 }
 
-private val ACCENT_COLORS = listOf(
-    0xFFE50914 to "قرمز سینمایی",
-    0xFFF5C518 to "طلایی",
-    0xFF4DD0E1 to "فیروزه‌ای",
-    0xFF2ECC71 to "سبز زمردی",
-    0xFF9B59B6 to "بنفش"
-)

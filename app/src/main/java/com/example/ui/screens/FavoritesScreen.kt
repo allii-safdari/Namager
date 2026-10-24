@@ -1,6 +1,5 @@
 package com.example.ui.screens
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,7 +22,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.CreateNewFolder
 import androidx.compose.material.icons.filled.DeleteSweep
@@ -61,10 +59,9 @@ import com.example.domain.model.FavoriteGroup
 import com.example.domain.model.Media
 import com.example.ui.components.EmptyStateView
 import com.example.ui.components.MediaCard
-import com.example.ui.theme.CinemaGold
-import com.example.ui.theme.CinemaRed
+import com.example.ui.theme.FlameLight
+import com.example.ui.theme.Flame
 import com.example.ui.theme.DarkSurface
-import com.example.ui.theme.GlassBorder
 import com.example.ui.theme.TextPrimary
 import com.example.ui.theme.TextSecondary
 import com.example.ui.viewmodel.FavoritesUiState
@@ -132,7 +129,7 @@ fun FavoritesScreen(
                                 Icon(
                                     imageVector = Icons.Default.CreateNewFolder,
                                     contentDescription = "ساخت پوشه جدید",
-                                    tint = CinemaGold
+                                    tint = FlameLight
                                 )
                             }
                             if (state.totalSaved > 0) {
@@ -143,7 +140,7 @@ fun FavoritesScreen(
                                     Icon(
                                         imageVector = Icons.Default.DeleteSweep,
                                         contentDescription = "پاک‌سازی همه علاقه‌مندی‌ها",
-                                        tint = CinemaRed
+                                        tint = Flame
                                     )
                                 }
                             }
@@ -164,7 +161,7 @@ fun FavoritesScreen(
                                 label = { Text("همه موارد") },
                                 shape = CircleShape,
                                 colors = FilterChipDefaults.filterChipColors(
-                                    selectedContainerColor = CinemaGold,
+                                    selectedContainerColor = FlameLight,
                                     selectedLabelColor = Color.Black,
                                     containerColor = DarkSurface,
                                     labelColor = TextPrimary
@@ -180,7 +177,7 @@ fun FavoritesScreen(
                                 label = { Text(group.name) },
                                 shape = CircleShape,
                                 colors = InputChipDefaults.inputChipColors(
-                                    selectedContainerColor = CinemaGold,
+                                    selectedContainerColor = FlameLight,
                                     selectedLabelColor = Color.Black,
                                     containerColor = DarkSurface,
                                     labelColor = TextPrimary
@@ -202,7 +199,7 @@ fun FavoritesScreen(
                                             Icon(
                                                 imageVector = Icons.Default.Close,
                                                 contentDescription = "حذف پوشه",
-                                                tint = if (selected) Color.Black else CinemaRed,
+                                                tint = if (selected) Color.Black else Flame,
                                                 modifier = Modifier
                                                     .size(16.dp)
                                                     .clickable { groupToDelete = group }
@@ -339,7 +336,7 @@ private fun GroupNameDialog(
         confirmButton = {
             Button(
                 onClick = { if (name.isNotBlank()) onConfirm(name.trim()) },
-                colors = ButtonDefaults.buttonColors(containerColor = CinemaGold, contentColor = Color.Black)
+                colors = ButtonDefaults.buttonColors(containerColor = FlameLight, contentColor = Color.Black)
             ) {
                 Text(confirmLabel)
             }
@@ -367,7 +364,7 @@ private fun ConfirmDialog(
         confirmButton = {
             Button(
                 onClick = onConfirm,
-                colors = ButtonDefaults.buttonColors(containerColor = CinemaRed, contentColor = Color.White)
+                colors = ButtonDefaults.buttonColors(containerColor = Flame, contentColor = Color.White)
             ) {
                 Text(confirmLabel)
             }

@@ -24,7 +24,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter
-import com.example.ui.theme.CinemaGold
+import com.example.ui.theme.FlameLight
 import com.example.ui.theme.DarkSurfaceVariant
 
 /**
@@ -90,7 +90,7 @@ fun ErrorPosterPlaceholder(
         Icon(
             imageVector = Icons.Default.Movie,
             contentDescription = null,
-            tint = CinemaGold.copy(alpha = 0.4f),
+            tint = FlameLight.copy(alpha = 0.4f),
             modifier = Modifier.size(34.dp)
         )
     }

@@ -29,15 +29,12 @@ object PersianUtils {
         if (clean.equals("null", ignoreCase = true) || clean.equals("N/A", ignoreCase = true)) {
             return null
         }
-        // If it's already localized or text, format numbers
-        val persianNum = toPersianDigits(clean)
-        val hasUnit = persianNum.contains("دقیقه") || persianNum.contains("ساعت")
-        val isClockFormat = persianNum.contains(":")
-        return if (!hasUnit && !isClockFormat) {
-            "$persianNum دقیقه"
-        } else {
-            persianNum
-        }
+
+
+        val replacedText = clean.replace(Regex("min", RegexOption.IGNORE_CASE), "دقیقه")
+
+
+        return toPersianDigits(replacedText)
     }
 
     /**

@@ -46,8 +46,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.domain.model.Media
-import com.example.ui.theme.CinemaGold
-import com.example.ui.theme.CinemaRed
+import com.example.ui.theme.FlameLight
+import com.example.ui.theme.Flame
 import com.example.ui.theme.DarkSurface
 import com.example.ui.theme.DarkSurfaceVariant
 import com.example.ui.theme.GlassBorder
@@ -78,7 +78,7 @@ fun MediaCard(
         colors = CardDefaults.cardColors(containerColor = DarkSurface),
         border = BorderStroke(
             width = if (isFocused) 2.dp else 1.dp,
-            color = if (isFocused) CinemaGold else GlassBorder
+            color = if (isFocused) FlameLight else GlassBorder
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = if (isFocused) 8.dp else 2.dp)
     ) {
@@ -157,7 +157,7 @@ fun MediaCard(
                         Icon(
                             imageVector = if (isWatchlisted) Icons.Default.Bookmark else Icons.Outlined.BookmarkBorder,
                             contentDescription = if (isWatchlisted) "حذف از علاقه‌مندی‌ها" else "افزودن به علاقه‌مندی‌ها",
-                            tint = if (isWatchlisted) CinemaGold else TextPrimary,
+                            tint = if (isWatchlisted) FlameLight else TextPrimary,
                             modifier = Modifier.size(16.dp)
                         )
                     }
@@ -165,7 +165,7 @@ fun MediaCard(
 
                 Surface(
                     shape = RoundedCornerShape(4.dp),
-                    color = if (media.isSeries) CinemaRed else Color(0xCC1A1A1A),
+                    color = Flame,
                     modifier = Modifier
                         .align(Alignment.BottomStart)
                         .padding(8.dp)
@@ -230,7 +230,7 @@ fun MediaCard(
                         Text(
                             text = PersianUtils.toPersianDigits(media.year),
                             style = MaterialTheme.typography.labelSmall,
-                            color = CinemaGold,
+                            color = FlameLight,
                             fontWeight = FontWeight.SemiBold
                         )
                     }

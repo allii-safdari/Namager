@@ -56,7 +56,7 @@ fun QualitySelectionSheet(
                     modifier = Modifier
                         .size(46.dp)
                         .background(
-                            Brush.linearGradient(listOf(CinemaGoldDark, CinemaGold)),
+                            Brush.linearGradient(listOf(CinemaGoldDark, FlameLight)),
                             CircleShape
                         ),
                     contentAlignment = Alignment.Center
@@ -116,7 +116,7 @@ fun QualitySelectionSheet(
                         ),
                         border = BorderStroke(
                             width = if (isSelected) 2.dp else 1.dp,
-                            color = if (isSelected) CinemaGold else GlassBorder
+                            color = if (isSelected) FlameLight else GlassBorder
                         )
                     ) {
                         Row(
@@ -132,7 +132,7 @@ fun QualitySelectionSheet(
                             ) {
                                 Surface(
                                     shape = RoundedCornerShape(8.dp),
-                                    color = if (isSelected) CinemaGold else Color(0x33FFFFFF)
+                                    color = if (isSelected) FlameLight else Color(0x33FFFFFF)
                                 ) {
                                     Text(
                                         text = source.quality,
@@ -148,7 +148,7 @@ fun QualitySelectionSheet(
                                         text = qualityLabel,
                                         style = MaterialTheme.typography.titleMedium,
                                         fontWeight = FontWeight.Bold,
-                                        color = if (isSelected) CinemaGold else TextPrimary
+                                        color = if (isSelected) FlameLight else TextPrimary
                                     )
                                     Text(
                                         text = "فرمت ${source.type.uppercase()} • صدای استریو",
@@ -162,7 +162,7 @@ fun QualitySelectionSheet(
                                 selected = isSelected,
                                 onClick = { selectedSource = source },
                                 colors = RadioButtonDefaults.colors(
-                                    selectedColor = CinemaGold,
+                                    selectedColor = FlameLight,
                                     unselectedColor = TextTertiary
                                 )
                             )
@@ -188,7 +188,7 @@ fun QualitySelectionSheet(
                             .height(52.dp)
                             .testTag("btn_sheet_play"),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = CinemaGold,
+                            containerColor = FlameLight,
                             contentColor = Color.Black
                         ),
                         shape = RoundedCornerShape(50.dp)
@@ -219,13 +219,13 @@ fun QualitySelectionSheet(
                         colors = ButtonDefaults.outlinedButtonColors(
                             contentColor = Color.White
                         ),
-                        border = BorderStroke(1.5.dp, CinemaRed),
+                        border = BorderStroke(1.5.dp, Flame),
                         shape = RoundedCornerShape(50.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Download,
                             contentDescription = null,
-                            tint = CinemaRed,
+                            tint = Flame,
                             modifier = Modifier.size(20.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))

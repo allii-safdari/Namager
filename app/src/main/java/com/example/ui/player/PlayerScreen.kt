@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,8 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.domain.model.Source
-import com.example.ui.theme.CinemaGold
-import com.example.ui.theme.TextSecondary
+import com.example.ui.theme.FlameLight
 import com.example.ui.viewmodel.PlayerViewModel
 
 @Composable
@@ -53,7 +51,7 @@ fun PlayerScreen(
                 Button(
                     onClick = onClose,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = CinemaGold,
+                        containerColor = FlameLight,
                         contentColor = Color.Black
                     )
                 ) {

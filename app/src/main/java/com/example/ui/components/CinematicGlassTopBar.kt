@@ -3,6 +3,7 @@ package com.example.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -18,18 +19,21 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.domain.model.FilterOrder
-import com.example.ui.theme.CinemaGold
+import com.example.ui.theme.FlameLight
 import com.example.ui.theme.DarkSurface
 import com.example.ui.theme.GlassBorder
 import com.example.ui.theme.TextPrimary
 import com.example.ui.theme.TextSecondary
 
 /**
- * TopAppBar شیشه‌ای (Glassmorphism) برای صفحات فیلم‌ها و سریال‌ها.
- * اجازه می‌دهد تصاویر اسلایدشو از زیر نوار بالایی دیده شوند در حالی که خوانایی کامل حفظ می‌شود.
+- TopAppBar
+شیشه‌ای (Glassmorphism) برای صفحات فیلم‌ها و سریال‌ها.
+-
+اجازه می‌دهد تصاویر اسلایدشو از زیر نوار بالایی دیده شوند در حالی که خوانایی کامل حفظ می‌شود.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -77,10 +81,74 @@ fun CinematicGlassTopBar(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                // عنوان صفحه با خوانایی بالا و بج شیشه‌ای ملایم
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+
+
+                Box {
+                    IconButton(
+                        onClick = { menuOpen = true },
+                        modifier = Modifier
+                            .size(38.dp)
+                            .clip(CircleShape)
+                            .background(Color(0x44222230))
+                            .border(1.dp, GlassBorder, CircleShape)
+                            .testTag("top_bar_sort")
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.Sort,
+                            contentDescription = "مرتب‌سازی",
+                            tint = if (selectedOrder != FilterOrder.CREATED) FlameLight else TextPrimary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+
+                    DropdownMenu(
+                        expanded = menuOpen,
+                        onDismissRequest = { menuOpen = false },
+                        modifier = Modifier
+                            .background(DarkSurface)
+                            .border(1.dp, GlassBorder, RoundedCornerShape(12.dp))
+                    ) {
+                        Text(
+                            text = " بر اساس",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = TextSecondary,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                        )
+
+                        FilterOrder.entries.forEach { order ->
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        text = order.titleFa,
+                                        fontWeight = if (order == selectedOrder) FontWeight.Bold else FontWeight.Normal,
+                                        color = if (order == selectedOrder) FlameLight else TextPrimary
+                                    )
+                                },
+                                leadingIcon = {
+                                    if (order == selectedOrder) {
+                                        Icon(
+                                            Icons.Default.Check,
+                                            contentDescription = null,
+                                            tint = FlameLight,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                    }
+                                },
+                                onClick = {
+                                    onOrderSelected(order)
+                                    menuOpen = false
+                                },
+                                modifier = Modifier.testTag("sort_item_${order.value}")
+                            )
+                        }
+                    }
+                }
+
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 8.dp),
+                    contentAlignment = Alignment.Center
                 ) {
                     Box(
                         modifier = Modifier
@@ -94,96 +162,30 @@ fun CinematicGlassTopBar(
                             color = TextPrimary,
                             fontWeight = FontWeight.ExtraBold,
                             fontSize = 18.sp,
-                            style = MaterialTheme.typography.titleLarge
+                            style = MaterialTheme.typography.titleLarge,
+                            textAlign = TextAlign.Center
                         )
                     }
                 }
 
-                // دکمه‌های جستجو و مرتب‌سازی به سبک شیشه‌ای
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(24.dp)
+
+                IconButton(
+                    onClick = onSearchClick,
+                    modifier = Modifier
+                        .size(38.dp)
+                        .clip(CircleShape)
+                        .background(Color(0x44222230))
+                        .border(1.dp, GlassBorder, CircleShape)
+                        .testTag("top_bar_search")
                 ) {
-                    // دکمه جستجو
-                    IconButton(
-                        onClick = onSearchClick,
-                        modifier = Modifier
-                            .size(38.dp)
-                            .clip(CircleShape)
-                            .background(Color(0x44222230))
-                            .border(1.dp, GlassBorder, CircleShape)
-                            .testTag("top_bar_search")
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Search,
-                            contentDescription = "جستجو",
-                            tint = TextPrimary,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-
-                    // دکمه و منوی مرتب‌سازی
-                    Box {
-                        IconButton(
-                            onClick = { menuOpen = true },
-                            modifier = Modifier
-                                .size(38.dp)
-                                .clip(CircleShape)
-                                .background(Color(0x44222230))
-                                .border(1.dp, GlassBorder, CircleShape)
-                                .testTag("top_bar_sort")
-                        ) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.Sort,
-                                contentDescription = "مرتب‌سازی",
-                                tint = if (selectedOrder != FilterOrder.CREATED) CinemaGold else TextPrimary,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
-
-                        DropdownMenu(
-                            expanded = menuOpen,
-                            onDismissRequest = { menuOpen = false },
-                            modifier = Modifier
-                                .background(DarkSurface)
-                                .border(1.dp, GlassBorder, RoundedCornerShape(12.dp))
-                        ) {
-                            Text(
-                                text = " بر اساس",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = TextSecondary,
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                            )
-
-                            FilterOrder.entries.forEach { order ->
-                                DropdownMenuItem(
-                                    text = {
-                                        Text(
-                                            text = order.titleFa,
-                                            fontWeight = if (order == selectedOrder) FontWeight.Bold else FontWeight.Normal,
-                                            color = if (order == selectedOrder) CinemaGold else TextPrimary
-                                        )
-                                    },
-                                    leadingIcon = {
-                                        if (order == selectedOrder) {
-                                            Icon(
-                                                Icons.Default.Check,
-                                                contentDescription = null,
-                                                tint = CinemaGold,
-                                                modifier = Modifier.size(18.dp)
-                                            )
-                                        }
-                                    },
-                                    onClick = {
-                                        onOrderSelected(order)
-                                        menuOpen = false
-                                    },
-                                    modifier = Modifier.testTag("sort_item_${order.value}")
-                                )
-                            }
-                        }
-                    }
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = "جستجو",
+                        tint = TextPrimary,
+                        modifier = Modifier.size(20.dp)
+                    )
                 }
+
             }
 
             // خط باریک افقی شیشه‌ای در پایین نوار

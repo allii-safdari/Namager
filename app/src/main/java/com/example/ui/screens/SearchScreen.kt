@@ -31,7 +31,6 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.BookmarkBorder
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledTonalButton
@@ -65,9 +64,10 @@ import com.example.domain.model.Media
 import com.example.ui.components.CinematicPosterImage
 import com.example.ui.components.EmptyStateView
 import com.example.ui.components.ErrorRetryView
-import com.example.ui.theme.CinemaGold
+import com.example.ui.theme.FlameLight
 import com.example.ui.theme.DarkSurface
 import com.example.ui.theme.DarkSurfaceVariant
+import com.example.ui.theme.Flame
 import com.example.ui.theme.GlassBorder
 import com.example.ui.theme.TextPrimary
 import com.example.ui.theme.TextSecondary
@@ -292,7 +292,7 @@ private fun SearchResultCard(
 
                 Surface(
                     shape = RoundedCornerShape(4.dp),
-                    color = if (media.isSeries) Color(0xCCB71C1C) else Color(0xCC000000),
+                    color = if (media.isSeries) FlameLight else Flame ,//Color(0xCCB71C1C) else Color(0xCC000000),
                     modifier = Modifier
                         .align(Alignment.BottomStart)
                         .padding(6.dp)
@@ -333,7 +333,7 @@ private fun SearchResultCard(
                         Icon(
                             imageVector = if (isWatchlisted) Icons.Default.Bookmark else Icons.Outlined.BookmarkBorder,
                             contentDescription = if (isWatchlisted) "حذف از علاقه‌مندی‌ها" else "افزودن به علاقه‌مندی‌ها",
-                            tint = if (isWatchlisted) CinemaGold else TextTertiary,
+                            tint = if (isWatchlisted) FlameLight else TextTertiary,
                             modifier = Modifier.size(20.dp)
                         )
                     }
@@ -393,10 +393,6 @@ private fun SearchResultCard(
                 FilledTonalButton(
                     onClick = onMediaClick,
                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
-                    colors = ButtonDefaults.filledTonalButtonColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        contentColor = MaterialTheme.colorScheme.primary
-                    ),
                     shape = RoundedCornerShape(50.dp)
                 ) {
                     Icon(

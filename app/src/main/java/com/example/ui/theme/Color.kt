@@ -13,8 +13,8 @@ val DarkSurface = Color(0xFF14141B)
 val DarkSurfaceHighlight = Color(0xFF1E1E28)
 val GlassBorder = Color(0x1FFFFFFF)
 
-val Flame = Color(0xFFFF6B22)
-val FlameLight = Color(0xFFFFB02E)
+//val Flame = Color(0xFFFF6B22)
+//val FlameLight = Color(0xFFFFB02E)
 val FlameDeep = Color(0xFFE4332D)
 val ImdbGold = Color(0xFFF5C518)
 val OnFlame = Color(0xFF1A0F00)
@@ -24,8 +24,8 @@ val TextSecondary = Color(0xFFB8B0A4)
 val TextTertiary = Color(0xFF78788C)
 
 // نام‌های قبلی: مقدارشان با برند هماهنگ شد
-val CinemaGold = FlameLight
-val CinemaRed = Flame
+val FlameLight = Color(0xFFFFB02E)
+val Flame = Color(0xFFFF6B22)
 
 val FlameBrush = Brush.horizontalGradient(listOf(FlameLight, Flame, FlameDeep))
 

@@ -51,7 +51,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.R
 import com.example.domain.model.Media
-import com.example.ui.theme.CinemaGold
+import com.example.ui.theme.FlameLight
 import com.example.ui.theme.DarkBackground
 import com.example.ui.theme.TextPrimary
 import com.example.ui.theme.TextSecondary
@@ -117,7 +117,7 @@ fun HeroBanner(
             Icon(
                 imageVector = if (isWatchlisted) Icons.Default.Bookmark else Icons.Outlined.BookmarkBorder,
                 contentDescription = if (isWatchlisted) "حذف از علاقه‌مندی‌ها" else "افزودن به علاقه‌مندی‌ها",
-                tint = if (isWatchlisted) CinemaGold else Color.White,
+                tint = if (isWatchlisted) FlameLight else Color.White,
                 modifier = Modifier.size(20.dp)
             )
         }

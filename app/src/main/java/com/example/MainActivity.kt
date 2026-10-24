@@ -9,12 +9,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Icon
@@ -25,20 +21,10 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.NavigationRailItemDefaults
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -55,17 +41,14 @@ import androidx.navigation.compose.rememberNavController
 import com.example.ui.navigation.AppNavHost
 import com.example.ui.navigation.AppRoutes
 import com.example.ui.navigation.navigateTopLevel
-import com.example.ui.theme.CinemaGold
+import com.example.ui.theme.FlameLight
 import com.example.ui.theme.NamagerTheme
-import com.example.ui.theme.DarkBackground
-import com.example.ui.theme.DarkSurface
 import com.example.ui.theme.TextTertiary
 import com.example.ui.util.PersianUtils
 import com.example.ui.viewmodel.AppViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import com.example.ui.NamagerSplashScreen
 import com.example.ui.navigation.destinations
+import com.example.ui.theme.Flame
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -78,23 +61,7 @@ class MainActivity : ComponentActivity() {
 
             NamagerTheme {
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                    var showSplash by rememberSaveable { mutableStateOf(true) }
-
-                    AnimatedContent(
-                        targetState = showSplash,
-                        transitionSpec = {
-                            fadeIn(animationSpec = tween(450)) togetherWith fadeOut(animationSpec = tween(450))
-                        },
-                        label = "SplashScreenTransition"
-                    ) { isSplash ->
-                        if (isSplash) {
-                            NamagerSplashScreen(
-                                onFinished = { showSplash = false }
-                            )
-                        } else {
-                            CinematicApp(favoriteCount = favoriteCount)
-                        }
-                    }
+                    CinematicApp(favoriteCount = favoriteCount)
                 }
             }
         }
@@ -175,7 +142,7 @@ fun NamagerBottomNavigationBar(
                     if (destination.route == AppRoutes.FAVORITES && favoriteCount > 0) {
                         BadgedBox(
                             badge = {
-                                Badge(containerColor = CinemaGold, contentColor = Color.Black) {
+                                Badge(containerColor = Flame, contentColor = Color.Black) {
                                     Text(
                                         text = PersianUtils.toPersianDigits(favoriteCount),
                                         style = MaterialTheme.typography.labelSmall
@@ -209,13 +176,13 @@ fun NamagerBottomNavigationBar(
                         fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
                     )
                 },
-                colors = NavigationBarItemDefaults.colors(
+            /*    colors = NavigationBarItemDefaults.colors(
                     selectedIconColor = Color.Black,
-                    selectedTextColor = CinemaGold,
-                    indicatorColor = CinemaGold,
+                    selectedTextColor = FlameLight,
+                    indicatorColor = FlameLight,
                     unselectedIconColor = TextTertiary,
                     unselectedTextColor = TextTertiary
-                ),
+                ),*/
                 modifier = Modifier.testTag("nav_item_${destination.route}")
             )
         }
@@ -246,7 +213,7 @@ fun CinemaNavigationRail(
                     if (destination.route == AppRoutes.FAVORITES && favoriteCount > 0) {
                         BadgedBox(
                             badge = {
-                                Badge(containerColor = CinemaGold, contentColor = Color.Black) {
+                                Badge(containerColor = FlameLight, contentColor = Color.Black) {
                                     Text(
                                         text = PersianUtils.toPersianDigits(favoriteCount),
                                         style = MaterialTheme.typography.labelSmall
@@ -277,8 +244,8 @@ fun CinemaNavigationRail(
                 label = { Text(stringResource(destination.labelRes)) },
                 colors = NavigationRailItemDefaults.colors(
                     selectedIconColor = Color.Black,
-                    selectedTextColor = CinemaGold,
-                    indicatorColor = CinemaGold,
+                    selectedTextColor = FlameLight,
+                    indicatorColor = FlameLight,
                     unselectedIconColor = TextTertiary,
                     unselectedTextColor = TextTertiary
                 ),

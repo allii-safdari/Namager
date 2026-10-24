@@ -23,7 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.domain.model.Genre
-import com.example.ui.theme.CinemaRed
+import com.example.ui.theme.Flame
 import com.example.ui.theme.GlassBorder
 import com.example.ui.theme.TextPrimary
 
@@ -74,7 +74,7 @@ fun GenreChipsRow(
                 } else null,
                 shape = CircleShape,
                 colors = FilterChipDefaults.filterChipColors(
-                    selectedContainerColor = CinemaRed,
+                    selectedContainerColor = Flame,
                     selectedLabelColor = Color.White,
                     containerColor = Color(0x661E1E2C), // شفافیت شیشه‌ای کنترل‌شده
                     labelColor = TextPrimary

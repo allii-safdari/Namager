@@ -1,14 +1,8 @@
 package com.example.ui.components
 
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
-import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -18,7 +12,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.example.ui.theme.CinemaGold
+import com.example.ui.theme.FlameLight
 import com.example.ui.theme.DarkSurfaceVariant
 
 @Composable
@@ -73,7 +67,7 @@ fun ExpandableText(
                     Text(
                         text = if (expanded) "نمایش کمتر (Show Less)" else "مشاهده کامل (Show More)",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = CinemaGold,
+                        color = FlameLight,
                         fontWeight = FontWeight.Bold
                     )
                 }

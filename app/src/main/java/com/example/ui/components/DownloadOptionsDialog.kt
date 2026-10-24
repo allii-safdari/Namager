@@ -27,7 +27,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.domain.model.Source
 import com.example.ui.theme.*
 
@@ -53,7 +52,7 @@ fun DownloadOptionsDialog(
             ) {
                 Surface(
                     shape = RoundedCornerShape(8.dp),
-                    color = CinemaGold
+                    color = FlameLight
                 ) {
                     Text(
                         text = source.quality,
