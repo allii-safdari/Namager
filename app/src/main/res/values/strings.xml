@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Cinematic View</string>
+    <string name="app_name">نماگر</string>
     <string name="nav_movies">فیلم‌ها</string>
     <string name="nav_series">سریال‌ها</string>
     <string name="nav_search">جستجو</string>

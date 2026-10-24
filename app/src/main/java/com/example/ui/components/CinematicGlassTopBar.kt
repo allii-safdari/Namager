@@ -6,9 +6,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,10 +20,9 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.data.model.FilterOrder
+import com.example.domain.model.FilterOrder
 import com.example.ui.theme.CinemaGold
 import com.example.ui.theme.DarkSurface
-import com.example.ui.theme.DarkSurfaceVariant
 import com.example.ui.theme.GlassBorder
 import com.example.ui.theme.TextPrimary
 import com.example.ui.theme.TextSecondary
@@ -56,10 +55,10 @@ fun CinematicGlassTopBar(
                 .background(
                     Brush.verticalGradient(
                         colors = listOf(
-                            Color(0xEE101018),
-                            Color(0xC412121C),
-                            Color(0x8812121C),
-                            Color(0x3312121C)
+                            Color(0xF5101018),
+                            Color(0xDD12121C),
+                            Color(0xAA12121C),
+                            Color(0x5512121C)
                         )
                     )
                 )
@@ -73,7 +72,7 @@ fun CinematicGlassTopBar(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(64.dp)
+                    .height(56.dp)
                     .padding(horizontal = 16.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -88,7 +87,7 @@ fun CinematicGlassTopBar(
                             .clip(RoundedCornerShape(12.dp))
                             .background(Color(0x44222230))
                             .border(1.dp, GlassBorder, RoundedCornerShape(12.dp))
-                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                            .padding(horizontal = 12.dp, vertical = 4.dp)
                     ) {
                         Text(
                             text = title,
@@ -103,13 +102,13 @@ fun CinematicGlassTopBar(
                 // دکمه‌های جستجو و مرتب‌سازی به سبک شیشه‌ای
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(24.dp)
                 ) {
                     // دکمه جستجو
                     IconButton(
                         onClick = onSearchClick,
                         modifier = Modifier
-                            .size(42.dp)
+                            .size(38.dp)
                             .clip(CircleShape)
                             .background(Color(0x44222230))
                             .border(1.dp, GlassBorder, CircleShape)
@@ -128,14 +127,14 @@ fun CinematicGlassTopBar(
                         IconButton(
                             onClick = { menuOpen = true },
                             modifier = Modifier
-                                .size(42.dp)
+                                .size(38.dp)
                                 .clip(CircleShape)
                                 .background(Color(0x44222230))
                                 .border(1.dp, GlassBorder, CircleShape)
                                 .testTag("top_bar_sort")
                         ) {
                             Icon(
-                                imageVector = Icons.Default.Sort,
+                                imageVector = Icons.AutoMirrored.Filled.Sort,
                                 contentDescription = "مرتب‌سازی",
                                 tint = if (selectedOrder != FilterOrder.CREATED) CinemaGold else TextPrimary,
                                 modifier = Modifier.size(20.dp)
@@ -150,7 +149,7 @@ fun CinematicGlassTopBar(
                                 .border(1.dp, GlassBorder, RoundedCornerShape(12.dp))
                         ) {
                             Text(
-                                text = "مرتب‌سازی بر اساس:",
+                                text = " بر اساس",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = TextSecondary,
                                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)

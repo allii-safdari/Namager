@@ -19,7 +19,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.data.model.Source
+import com.example.domain.model.Source
 import com.example.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)

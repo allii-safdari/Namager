@@ -2,356 +2,380 @@ package com.example.ui.screens
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.CreateNewFolder
+import androidx.compose.material.icons.filled.DeleteSweep
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.InputChip
+import androidx.compose.material3.InputChipDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.R
-import com.example.data.local.LocalPreferencesManager
-import com.example.data.model.FavoriteGroup
-import com.example.data.model.UnifiedMedia
+import com.example.domain.model.FavoriteGroup
+import com.example.domain.model.Media
 import com.example.ui.components.EmptyStateView
-import com.example.ui.components.UnifiedMediaCard
-import com.example.ui.theme.*
-import com.example.ui.viewmodel.CinemaViewModel
+import com.example.ui.components.MediaCard
+import com.example.ui.theme.CinemaGold
+import com.example.ui.theme.CinemaRed
+import com.example.ui.theme.DarkSurface
+import com.example.ui.theme.GlassBorder
+import com.example.ui.theme.TextPrimary
+import com.example.ui.theme.TextSecondary
+import com.example.ui.viewmodel.FavoritesUiState
+import com.example.ui.viewmodel.FavoritesViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FavoritesScreen(
-    viewModel: CinemaViewModel,
-    onMediaClick: (UnifiedMedia) -> Unit,
-    modifier: Modifier = Modifier
+    onMediaClick: (Media) -> Unit,
+    modifier: Modifier = Modifier,
+    viewModel: FavoritesViewModel = hiltViewModel()
 ) {
-    val favoriteGroups by viewModel.favoriteGroups.collectAsStateWithLifecycle()
-    val favoriteItems by viewModel.favoriteItems.collectAsStateWithLifecycle()
-    val selectedGroupId by viewModel.selectedFavoriteGroupId.collectAsStateWithLifecycle()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
 
-    var showCreateGroupDialog by remember { mutableStateOf(false) }
+    var showCreateDialog by remember { mutableStateOf(false) }
     var groupToRename by remember { mutableStateOf<FavoriteGroup?>(null) }
     var groupToDelete by remember { mutableStateOf<FavoriteGroup?>(null) }
-    var showClearAllDialog by remember { mutableStateOf(false) }
+    var showClearDialog by remember { mutableStateOf(false) }
 
-    val displayedItems = remember(favoriteItems, selectedGroupId) {
-        if (selectedGroupId == "ALL") {
-            favoriteItems.map { it.media }.distinctBy { it.id }
-        } else {
-            favoriteItems.filter { it.groupId == selectedGroupId }.map { it.media }.distinctBy { it.id }
-        }
+    LaunchedEffect(viewModel) {
+        viewModel.messages.collect { snackbarHostState.showSnackbar(it) }
     }
 
-    val selectedGroup = favoriteGroups.find { it.id == selectedGroupId }
-
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(top = 16.dp)
-            .testTag("favorites_screen"),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        // Top Action Bar: Create group & Clear all
-        Row(
+    Box(modifier = modifier.fillMaxSize()) {
+        LazyVerticalGrid(
+            columns = GridCells.Adaptive(minSize = 150.dp),
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+                .fillMaxSize()
+                .statusBarsPadding()
+                .testTag("favorites_screen"),
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 104.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text(
-                text = "پوشه‌های علاقه‌مندی",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = TextPrimary
-            )
-
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                // Add new group
-                IconButton(
-                    onClick = { showCreateGroupDialog = true },
-                    modifier = Modifier.testTag("btn_add_fav_group")
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.CreateNewFolder,
-                        contentDescription = "ساخت گروه جدید",
-                        tint = CinemaGold
-                    )
-                }
-
-                // Clear all
-                if (favoriteItems.isNotEmpty()) {
-                    IconButton(
-                        onClick = { showClearAllDialog = true },
-                        modifier = Modifier.testTag("btn_clear_all_fav")
+            item(
+                key = "favorites_header",
+                span = { GridItemSpan(maxLineSpan) },
+                contentType = "header"
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.DeleteSweep,
-                            contentDescription = "پاک‌سازی کلی",
-                            tint = CinemaRed
+                        Column {
+                            Text(
+                                text = "علاقه‌مندی‌ها",
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = TextPrimary
+                            )
+                            Text(
+                                text = "${state.totalSaved} عنوان ذخیره‌شده",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = TextSecondary
+                            )
+                        }
+
+                        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            IconButton(
+                                onClick = { showCreateDialog = true },
+                                modifier = Modifier.testTag("btn_add_fav_group")
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.CreateNewFolder,
+                                    contentDescription = "ساخت پوشه جدید",
+                                    tint = CinemaGold
+                                )
+                            }
+                            if (state.totalSaved > 0) {
+                                IconButton(
+                                    onClick = { showClearDialog = true },
+                                    modifier = Modifier.testTag("btn_clear_all_fav")
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.DeleteSweep,
+                                        contentDescription = "پاک‌سازی همه علاقه‌مندی‌ها",
+                                        tint = CinemaRed
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        contentPadding = PaddingValues(vertical = 2.dp)
+                    ) {
+                        item(key = "all_groups") {
+                            val selected = state.selectedGroupId == FavoritesUiState.ALL_GROUP_ID
+                            FilterChip(
+                                selected = selected,
+                                onClick = {
+                                    viewModel.selectGroup(FavoritesUiState.ALL_GROUP_ID)
+                                },
+                                label = { Text("همه موارد") },
+                                shape = CircleShape,
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = CinemaGold,
+                                    selectedLabelColor = Color.Black,
+                                    containerColor = DarkSurface,
+                                    labelColor = TextPrimary
+                                )
+                            )
+                        }
+
+                        items(state.groups, key = { it.id }) { group ->
+                            val selected = group.id == state.selectedGroupId
+                            InputChip(
+                                selected = selected,
+                                onClick = { viewModel.selectGroup(group.id) },
+                                label = { Text(group.name) },
+                                shape = CircleShape,
+                                colors = InputChipDefaults.inputChipColors(
+                                    selectedContainerColor = CinemaGold,
+                                    selectedLabelColor = Color.Black,
+                                    containerColor = DarkSurface,
+                                    labelColor = TextPrimary
+                                ),
+                                trailingIcon = if (group.isDefault) {
+                                    null
+                                } else {
+                                    {
+                                        Row {
+                                            Icon(
+                                                imageVector = Icons.Default.Edit,
+                                                contentDescription = "تغییر نام",
+                                                tint = if (selected) Color.Black else TextSecondary,
+                                                modifier = Modifier
+                                                    .size(16.dp)
+                                                    .clickable { groupToRename = group }
+                                            )
+                                            Spacer(modifier = Modifier.width(4.dp))
+                                            Icon(
+                                                imageVector = Icons.Default.Close,
+                                                contentDescription = "حذف پوشه",
+                                                tint = if (selected) Color.Black else CinemaRed,
+                                                modifier = Modifier
+                                                    .size(16.dp)
+                                                    .clickable { groupToDelete = group }
+                                            )
+                                        }
+                                    }
+                                }
+                            )
+                        }
+                    }
+
+                    if (state.selectedGroupId != FavoritesUiState.ALL_GROUP_ID && state.selectedGroup != null) {
+                        Text(
+                            text = "پوشه ${state.selectedGroup?.name} • ${state.items.size} عنوان",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = TextSecondary
                         )
                     }
                 }
             }
-        }
 
-        // Horizontal Group Chips with actions
-        LazyRow(
-            contentPadding = PaddingValues(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            // "همه" option
-            item {
-                val isSelected = (selectedGroupId == "ALL")
-                FilterChip(
-                    selected = isSelected,
-                    onClick = { viewModel.selectFavoriteGroup("ALL") },
-                    label = { Text("همه موارد") },
-                    shape = CircleShape,
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = CinemaGold,
-                        selectedLabelColor = Color.Black,
-                        containerColor = DarkSurface,
-                        labelColor = TextPrimary
-                    )
-                )
-            }
-
-            items(favoriteGroups, key = { it.id }) { group ->
-                val isSelected = (group.id == selectedGroupId)
-                InputChip(
-                    selected = isSelected,
-                    onClick = { viewModel.selectFavoriteGroup(group.id) },
-                    label = { Text(group.name) },
-                    shape = CircleShape,
-                    colors = InputChipDefaults.inputChipColors(
-                        selectedContainerColor = CinemaGold,
-                        selectedLabelColor = Color.Black,
-                        containerColor = DarkSurface,
-                        labelColor = TextPrimary
-                    ),
-                    trailingIcon = if (!group.isDefault) {
-                        {
-                            Row {
-                                Icon(
-                                    imageVector = Icons.Default.Edit,
-                                    contentDescription = "ویرایش",
-                                    tint = if (isSelected) Color.Black else TextSecondary,
-                                    modifier = Modifier
-                                        .size(16.dp)
-                                        .clickable { groupToRename = group }
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Icon(
-                                    imageVector = Icons.Default.Close,
-                                    contentDescription = "حذف",
-                                    tint = if (isSelected) Color.Black else CinemaRed,
-                                    modifier = Modifier
-                                        .size(16.dp)
-                                        .clickable { groupToDelete = group }
-                                )
-                            }
+            if (state.items.isEmpty()) {
+                item(span = { GridItemSpan(maxLineSpan) }, contentType = "empty") {
+                    EmptyStateView(
+                        message = if (state.totalSaved == 0) {
+                            "هنوز چیزی ذخیره نکرده‌اید. با زدن نشان روی هر فیلم یا سریال، آن را اینجا ذخیره کنید."
+                        } else {
+                            "در این پوشه عنوانی وجود ندارد."
                         }
-                    } else null
-                )
-            }
-        }
-
-        // Selected Group Info Header
-        if (selectedGroup != null && selectedGroupId != "ALL") {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "گروه: ${selectedGroup.name} (${displayedItems.size} عنوان)",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = TextSecondary
-                )
-            }
-        }
-
-        // Favorites Grid
-        if (displayedItems.isEmpty()) {
-            EmptyStateView(
-                message = stringResource(id = R.string.empty_watchlist_desc),
-                modifier = Modifier.weight(1f)
-            )
-        } else {
-            LazyVerticalGrid(
-                columns = GridCells.Adaptive(minSize = 150.dp),
-                modifier = Modifier
-                    .fillMaxSize()
-                    .testTag("favorites_grid"),
-                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 96.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(displayedItems, key = { it.id }) { item ->
-                    UnifiedMediaCard(
-                        media = item,
+                    )
+                }
+            } else {
+                items(state.items, key = { it.id }, contentType = { "media" }) { media ->
+                    MediaCard(
+                        media = media,
                         isWatchlisted = true,
                         onMediaClick = onMediaClick,
                         onToggleWatchlist = {
-                            viewModel.removeFromFavorites(
-                                it,
-                                if (selectedGroupId == "ALL") null else selectedGroupId
+                            viewModel.remove(
+                                mediaId = media.id,
+                                groupId = state.selectedGroupId.takeIf {
+                                    it != FavoritesUiState.ALL_GROUP_ID
+                                }
                             )
                         }
                     )
                 }
             }
         }
-    }
 
-    // Dialog: Create New Group
-    if (showCreateGroupDialog) {
-        var groupName by remember { mutableStateOf("") }
-        AlertDialog(
-            onDismissRequest = { showCreateGroupDialog = false },
-            title = { Text("ایجاد گروه جدید", fontWeight = FontWeight.Bold) },
-            text = {
-                OutlinedTextField(
-                    value = groupName,
-                    onValueChange = { groupName = it },
-                    label = { Text("نام گروه") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        if (groupName.isNotBlank()) {
-                            viewModel.createFavoriteGroup(groupName)
-                            showCreateGroupDialog = false
-                        }
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = CinemaGold, contentColor = Color.Black)
-                ) {
-                    Text("ایجاد")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showCreateGroupDialog = false }) {
-                    Text("انصراف")
-                }
-            },
-            containerColor = DarkSurface,
-            shape = RoundedCornerShape(28.dp)
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(horizontal = 16.dp, vertical = 88.dp)
         )
     }
 
-    // Dialog: Rename Group
-    if (groupToRename != null) {
-        var newName by remember { mutableStateOf(groupToRename!!.name) }
-        AlertDialog(
-            onDismissRequest = { groupToRename = null },
-            title = { Text("تغییر نام گروه", fontWeight = FontWeight.Bold) },
-            text = {
-                OutlinedTextField(
-                    value = newName,
-                    onValueChange = { newName = it },
-                    label = { Text("نام جدید") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        if (newName.isNotBlank()) {
-                            viewModel.renameFavoriteGroup(groupToRename!!.id, newName)
-                            groupToRename = null
-                        }
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = CinemaGold, contentColor = Color.Black)
-                ) {
-                    Text("ذخیره")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { groupToRename = null }) {
-                    Text("انصراف")
-                }
-            },
-            containerColor = DarkSurface,
-            shape = RoundedCornerShape(28.dp)
+    if (showCreateDialog) {
+        GroupNameDialog(
+            title = "ایجاد پوشه جدید",
+            initialName = "",
+            confirmLabel = "ایجاد",
+            onDismiss = { showCreateDialog = false },
+            onConfirm = { name ->
+                viewModel.createGroup(name)
+                showCreateDialog = false
+            }
         )
     }
 
-    // Dialog: Delete Group
-    if (groupToDelete != null) {
-        AlertDialog(
-            onDismissRequest = { groupToDelete = null },
-            title = { Text("حذف گروه", fontWeight = FontWeight.Bold) },
-            text = {
-                Text("آیا از حذف گروه «${groupToDelete!!.name}» و تمام فیلم‌های ذخیره‌شده در آن اطمینان دارید؟")
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        viewModel.deleteFavoriteGroup(groupToDelete!!.id)
-                        groupToDelete = null
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = CinemaRed, contentColor = Color.White)
-                ) {
-                    Text("حذف")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { groupToDelete = null }) {
-                    Text("انصراف")
-                }
-            },
-            containerColor = DarkSurface,
-            shape = RoundedCornerShape(28.dp)
+    groupToRename?.let { group ->
+        GroupNameDialog(
+            title = "تغییر نام پوشه",
+            initialName = group.name,
+            confirmLabel = "ذخیره",
+            onDismiss = { groupToRename = null },
+            onConfirm = { name ->
+                viewModel.renameGroup(group.id, name)
+                groupToRename = null
+            }
         )
     }
 
-    // Dialog: Clear All Favorites
-    if (showClearAllDialog) {
-        AlertDialog(
-            onDismissRequest = { showClearAllDialog = false },
-            title = { Text("پاک‌سازی کلی علاقه‌مندی‌ها", fontWeight = FontWeight.Bold) },
-            text = {
-                Text("آیا می‌خواهید تمام عناوین ذخیره‌شده در همه گروه‌ها حذف شوند؟")
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        viewModel.clearAllFavorites()
-                        showClearAllDialog = false
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = CinemaRed, contentColor = Color.White)
-                ) {
-                    Text("پاک‌سازی کامل")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showClearAllDialog = false }) {
-                    Text("انصراف")
-                }
-            },
-            containerColor = DarkSurface,
-            shape = RoundedCornerShape(28.dp)
+    groupToDelete?.let { group ->
+        ConfirmDialog(
+            title = "حذف پوشه",
+            message = "آیا پوشه «${group.name}» و همه عناوین داخل آن حذف شود؟",
+            confirmLabel = "حذف",
+            onDismiss = { groupToDelete = null },
+            onConfirm = {
+                viewModel.deleteGroup(group.id)
+                groupToDelete = null
+            }
         )
     }
+
+    if (showClearDialog) {
+        ConfirmDialog(
+            title = "پاک‌سازی همه علاقه‌مندی‌ها",
+            message = "همه عناوین ذخیره‌شده در تمام پوشه‌ها حذف می‌شوند. این کار قابل بازگشت نیست.",
+            confirmLabel = "پاک‌سازی",
+            onDismiss = { showClearDialog = false },
+            onConfirm = {
+                viewModel.clearAll()
+                showClearDialog = false
+            }
+        )
+    }
+}
+
+@Composable
+private fun GroupNameDialog(
+    title: String,
+    initialName: String,
+    confirmLabel: String,
+    onDismiss: () -> Unit,
+    onConfirm: (String) -> Unit
+) {
+    var name by remember(initialName) { mutableStateOf(initialName) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(title, fontWeight = FontWeight.Bold) },
+        text = {
+            OutlinedTextField(
+                value = name,
+                onValueChange = { name = it },
+                label = { Text("نام پوشه") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+        },
+        confirmButton = {
+            Button(
+                onClick = { if (name.isNotBlank()) onConfirm(name.trim()) },
+                colors = ButtonDefaults.buttonColors(containerColor = CinemaGold, contentColor = Color.Black)
+            ) {
+                Text(confirmLabel)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("انصراف") }
+        },
+        containerColor = DarkSurface,
+        shape = RoundedCornerShape(24.dp)
+    )
+}
+
+@Composable
+private fun ConfirmDialog(
+    title: String,
+    message: String,
+    confirmLabel: String,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(title, fontWeight = FontWeight.Bold) },
+        text = { Text(message) },
+        confirmButton = {
+            Button(
+                onClick = onConfirm,
+                colors = ButtonDefaults.buttonColors(containerColor = CinemaRed, contentColor = Color.White)
+            ) {
+                Text(confirmLabel)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("انصراف") }
+        },
+        containerColor = DarkSurface,
+        shape = RoundedCornerShape(24.dp)
+    )
 }

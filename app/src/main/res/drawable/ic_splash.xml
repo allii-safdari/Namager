@@ -1,0 +1,58 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="288dp"
+    android:height="288dp"
+    android:viewportWidth="512"
+    android:viewportHeight="512">
+
+    <!-- مثلث پخش (گوشه‌های گرد با stroke) -->
+    <path
+        android:pathData="M170,140 L170,372 L370,256 Z"
+        android:strokeWidth="40"
+        android:strokeLineJoin="round">
+        <aapt:attr name="android:fillColor">
+            <gradient android:type="linear"
+                android:startX="170" android:startY="140"
+                android:endX="370" android:endY="372">
+                <item android:offset="0" android:color="#FFFFB02E"/>
+                <item android:offset="0.55" android:color="#FFFF6B22"/>
+                <item android:offset="1" android:color="#FFE4332D"/>
+            </gradient>
+        </aapt:attr>
+        <aapt:attr name="android:strokeColor">
+            <gradient android:type="linear"
+                android:startX="170" android:startY="140"
+                android:endX="370" android:endY="372">
+                <item android:offset="0" android:color="#FFFFB02E"/>
+                <item android:offset="0.55" android:color="#FFFF6B22"/>
+                <item android:offset="1" android:color="#FFE4332D"/>
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- لایه‌ی تیره‌ی پشت شعله (فاصله‌ی بین مثلث و شعله) -->
+    <group android:pivotX="256" android:pivotY="440"
+        android:scaleX="0.52" android:scaleY="0.52"
+        android:translateX="2" android:translateY="-110">
+        <path
+            android:fillColor="#FF0F0F14"
+            android:pathData="M270,52C292,120 330,150 362,196C394,242 400,300 380,348C358,402 312,440 256,440C190,440 136,394 124,330C114,276 134,232 166,196C172,226 188,244 206,252C196,196 214,120 270,52Z"/>
+    </group>
+
+    <!-- شعله -->
+    <group android:pivotX="256" android:pivotY="440"
+        android:scaleX="0.45" android:scaleY="0.45"
+        android:translateX="2" android:translateY="-110">
+        <path android:pathData="M270,52C292,120 330,150 362,196C394,242 400,300 380,348C358,402 312,440 256,440C190,440 136,394 124,330C114,276 134,232 166,196C172,226 188,244 206,252C196,196 214,120 270,52Z">
+            <aapt:attr name="android:fillColor">
+                <gradient android:type="linear"
+                    android:startX="0" android:startY="52"
+                    android:endX="0" android:endY="440">
+                    <item android:offset="0" android:color="#FFFFE45C"/>
+                    <item android:offset="0.4" android:color="#FFFFA81F"/>
+                    <item android:offset="1" android:color="#FFE5262B"/>
+                </gradient>
+            </aapt:attr>
+        </path>
+    </group>
+</vector>

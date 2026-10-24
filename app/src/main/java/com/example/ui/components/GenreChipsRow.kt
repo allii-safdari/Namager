@@ -22,7 +22,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.data.model.Genre
+import com.example.domain.model.Genre
 import com.example.ui.theme.CinemaRed
 import com.example.ui.theme.GlassBorder
 import com.example.ui.theme.TextPrimary

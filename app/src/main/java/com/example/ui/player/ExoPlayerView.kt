@@ -30,6 +30,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
@@ -39,7 +43,7 @@ import androidx.media3.common.Tracks
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
-import com.example.data.model.Source
+import com.example.domain.model.Source
 import com.example.ui.theme.*
 import com.example.ui.util.PersianUtils
 import kotlinx.coroutines.delay
@@ -72,20 +76,33 @@ fun ExoPlayerView(
 
     var lastSavedPosition by remember { mutableLongStateOf(0L) }
 
-    val exoPlayer = remember {
+    val exoPlayer = remember(source.url) {
         ExoPlayer.Builder(context).build().apply {
+            setAudioAttributes(
+                AudioAttributes.Builder()
+                    .setUsage(C.USAGE_MEDIA)
+                    .setContentType(C.AUDIO_CONTENT_TYPE_MOVIE)
+                    .build(),
+                true
+            )
+            setHandleAudioBecomingNoisy(true)
             playWhenReady = true
         }
     }
 
-    DisposableEffect(source.url) {
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner, exoPlayer) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_STOP) exoPlayer.pause()
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
+    DisposableEffect(exoPlayer) {
         val mediaItem = MediaItem.fromUri(source.url)
         exoPlayer.setMediaItem(mediaItem)
         exoPlayer.prepare()
-        if (lastSavedPosition > 0L) {
-            exoPlayer.seekTo(lastSavedPosition)
-        }
-        onPlaybackStarted()
 
         val listener = object : Player.Listener {
             override fun onIsPlayingChanged(playing: Boolean) {
@@ -111,6 +128,7 @@ fun ExoPlayerView(
         }
 
         exoPlayer.addListener(listener)
+        onPlaybackStarted()
 
         onDispose {
             exoPlayer.removeListener(listener)
@@ -118,13 +136,17 @@ fun ExoPlayerView(
         }
     }
 
-    // Polling for timeline progress
+    // Poll the timeline only while playback is active. The old implementation
+    // kept waking up and recomposing every 500 ms even when paused.
     LaunchedEffect(isPlaying) {
-        while (true) {
-            if (exoPlayer.playbackState == Player.STATE_READY || isPlaying) {
-                currentPosition = exoPlayer.currentPosition.coerceAtLeast(0L)
-                duration = exoPlayer.duration.coerceAtLeast(0L)
-            }
+        if (!isPlaying) {
+            currentPosition = exoPlayer.currentPosition.coerceAtLeast(0L)
+            duration = exoPlayer.duration.coerceAtLeast(0L)
+            return@LaunchedEffect
+        }
+        while (isPlaying) {
+            currentPosition = exoPlayer.currentPosition.coerceAtLeast(0L)
+            duration = exoPlayer.duration.coerceAtLeast(0L)
             delay(500)
         }
     }
@@ -192,7 +214,8 @@ fun ExoPlayerView(
             factory = { ctx ->
                 PlayerView(ctx).apply {
                     player = exoPlayer
-                    useController = false // We use our own polished M3 Persian controls overlay
+                    useController = false
+                    keepScreenOn = true
                     layoutParams = FrameLayout.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.MATCH_PARENT

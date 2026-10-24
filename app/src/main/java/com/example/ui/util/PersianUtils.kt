@@ -31,8 +31,10 @@ object PersianUtils {
         }
         // If it's already localized or text, format numbers
         val persianNum = toPersianDigits(clean)
-        return if (!persianNum.contains("دقیقه") && !persianNum.contains("ساعت")) {
-            persianNum
+        val hasUnit = persianNum.contains("دقیقه") || persianNum.contains("ساعت")
+        val isClockFormat = persianNum.contains(":")
+        return if (!hasUnit && !isClockFormat) {
+            "$persianNum دقیقه"
         } else {
             persianNum
         }

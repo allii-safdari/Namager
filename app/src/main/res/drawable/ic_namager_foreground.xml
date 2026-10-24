@@ -1,0 +1,12 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <!-- Simplified, scalable Namager mark: film strip + flame/play symbol. -->
+    <path android:fillColor="#FF7900"
+        android:pathData="M18,22 C18,16 22,12 28,12 L38,12 C47,12 52,18 52,27 L52,76 C52,88 44,96 32,96 L28,96 C22,96 18,92 18,86 Z" />
+    <path android:fillColor="#090A0D" android:pathData="M25,24 h8 a2,2 0,0 1,2 2 v5 a2,2 0,0 1,-2 2 h-8 a2,2 0,0 1,-2 -2 v-5 a2,2 0,0 1,2 -2 M25,42 h8 a2,2 0,0 1,2 2 v5 a2,2 0,0 1,-2 2 h-8 a2,2 0,0 1,-2 -2 v-5 a2,2 0,0 1,2 -2 M25,60 h8 a2,2 0,0 1,2 2 v5 a2,2 0,0 1,-2 2 h-8 a2,2 0,0 1,-2 -2 v-5 a2,2 0,0 1,2 -2 M25,78 h8 a2,2 0,0 1,2 2 v5 a2,2 0,0 1,-2 2 h-8 a2,2 0,0 1,-2 -2 v-5 a2,2 0,0 1,2 -2" />
+    <path android:fillColor="#FFC233" android:pathData="M65,12 C53,28 65,39 73,49 C80,58 78,68 68,77 C87,69 91,54 81,41 C73,31 65,25 65,12 Z" />
+    <path android:fillColor="#FF3B30" android:pathData="M69,36 C58,49 55,57 62,67 C66,73 65,79 58,84 C74,80 82,69 75,58 C71,51 67,45 69,36 Z" />
+    <path android:fillColor="#FF7900" android:pathData="M46,69 L88,49 C92,47 96,50 96,54 L96,73 C96,77 92,80 88,78 L46,69 Z" />
+    <path android:fillColor="#090A0D" android:pathData="M57,64 L79,56 L79,75 Z" />
+</vector>

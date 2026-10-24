@@ -2,8 +2,21 @@ package com.example.ui.screens
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -12,14 +25,32 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.BookmarkBorder
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
@@ -28,65 +59,66 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.data.model.UnifiedMedia
+import com.example.domain.model.Media
 import com.example.ui.components.CinematicPosterImage
 import com.example.ui.components.EmptyStateView
 import com.example.ui.components.ErrorRetryView
-import com.example.ui.components.SkeletonMediaCard
-import com.example.ui.theme.*
+import com.example.ui.theme.CinemaGold
+import com.example.ui.theme.DarkSurface
+import com.example.ui.theme.DarkSurfaceVariant
+import com.example.ui.theme.GlassBorder
+import com.example.ui.theme.TextPrimary
+import com.example.ui.theme.TextSecondary
+import com.example.ui.theme.TextTertiary
 import com.example.ui.util.PersianUtils
-import com.example.ui.viewmodel.CinemaViewModel
-import com.example.ui.viewmodel.UiState
+import com.example.ui.viewmodel.SearchViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
+private val QUICK_TAGS = listOf(
+    "درام و اجتماعی",
+    "جنایی و پلیسی",
+    "کمدی و طنز",
+    "عاشقانه",
+    "تاریخی",
+    "اکشن و ماجراجویی",
+    "جشنواره‌ای"
+)
+
 @Composable
 fun SearchScreen(
-    viewModel: CinemaViewModel,
-    onMediaClick: (UnifiedMedia) -> Unit,
-    modifier: Modifier = Modifier
+    onMediaClick: (Media) -> Unit,
+    modifier: Modifier = Modifier,
+    viewModel: SearchViewModel = hiltViewModel()
 ) {
-    val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
-    val searchState by viewModel.searchState.collectAsStateWithLifecycle()
-    val watchlistIds by viewModel.watchlistIds.collectAsStateWithLifecycle()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
 
-    val quickTags = listOf(
-        "درام و اجتماعی",
-        "جنایی و پلیسی",
-        "کمدی و طنز",
-        "عاشقانه",
-        "تاریخی",
-        "اکشن و ماجراجویی",
-        "جشنواره‌ای"
-    )
+    LaunchedEffect(viewModel) {
+        viewModel.messages.collect { snackbarHostState.showSnackbar(it) }
+    }
 
-    LazyColumn(
-        modifier = modifier
-            .fillMaxSize()
-            .testTag("search_screen_lazy_column"),
-        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 96.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        // Search Input Header
-        item {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-
-                // Search Box with Action Button
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
+    Box(modifier = modifier.fillMaxSize()) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding()
+                .imePadding()
+                .testTag("search_screen_lazy_column"),
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 104.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            item(key = "search_header", contentType = "header") {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     OutlinedTextField(
-                        value = searchQuery,
-                        onValueChange = { viewModel.updateSearchQuery(it) },
+                        value = state.query,
+                        onValueChange = viewModel::onQueryChange,
                         modifier = Modifier
-
                             .fillMaxWidth()
                             .testTag("search_text_field"),
                         placeholder = {
                             Text(
-                                text = "جستجوی نام فیلم، سریال، موضوع...",
+                                text = "جستجوی نام فیلم، سریال یا موضوع…",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = TextTertiary
                             )
@@ -99,8 +131,11 @@ fun SearchScreen(
                             )
                         },
                         trailingIcon = {
-                            if (searchQuery.isNotEmpty()) {
-                                IconButton(onClick = { viewModel.clearSearch() }) {
+                            if (state.query.isNotEmpty()) {
+                                IconButton(
+                                    onClick = viewModel::clearSearch,
+                                    modifier = Modifier.testTag("search_clear")
+                                ) {
                                     Icon(
                                         imageVector = Icons.Default.Close,
                                         contentDescription = "پاک کردن",
@@ -111,8 +146,8 @@ fun SearchScreen(
                         },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                        keyboardActions = KeyboardActions(onSearch = { viewModel.executeSearch() }),
-                      //  shape = RoundedCornerShape(32.dp),
+                        keyboardActions = KeyboardActions(onSearch = { viewModel.submitSearch() }),
+                        shape = RoundedCornerShape(18.dp),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedContainerColor = DarkSurface,
                             unfocusedContainerColor = DarkSurface,
@@ -122,105 +157,102 @@ fun SearchScreen(
                             unfocusedTextColor = TextPrimary
                         )
                     )
-                }
 
-                // Quick Topic/Genre Suggestion Chips
-                Text(
-                    text = "پیشنهادهای پربازدید:",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = TextSecondary
-                )
+                    Text(
+                        text = "پیشنهادهای پربازدید:",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = TextSecondary
+                    )
 
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    contentPadding = PaddingValues(horizontal = 2.dp)
-                ) {
-                    items(quickTags) { tag ->
-                        Surface(
-                            onClick = {
-                                viewModel.updateSearchQuery(tag)
-                                viewModel.executeSearch()
-                            },
-                            shape = CircleShape,
-                            color = DarkSurface,
-                            border = BorderStroke(1.dp, GlassBorder)
-                        ) {
-                            Text(
-                                text = tag,
-                                style = MaterialTheme.typography.labelMedium,
-                                color = TextPrimary,
-                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
-                            )
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        items(QUICK_TAGS, key = { it }) { tag ->
+                            Surface(
+                                onClick = { viewModel.searchQuickTag(tag) },
+                                shape = CircleShape,
+                                color = DarkSurface,
+                                border = BorderStroke(1.dp, GlassBorder)
+                            ) {
+                                Text(
+                                    text = tag,
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = TextPrimary,
+                                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
+                                )
+                            }
                         }
                     }
                 }
             }
-        }
 
-        // Section Title: Results
-        item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = if (searchQuery.isNotBlank()) "نتایج برای «$searchQuery»" else "فیلم‌ها و سریال‌های پیشنهادی",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = TextPrimary
-                )
-            }
-        }
-
-        // Search State Handling
-        when (val state = searchState) {
-            is UiState.Loading -> {
-                item {
-                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        repeat(3) {
-                            SkeletonSearchItemCard()
-                        }
-                    }
-                }
-            }
-            is UiState.Error -> {
-                item {
-                    ErrorRetryView(
-                        message = state.message,
-                        onRetry = { viewModel.executeSearch() }
+            if (state.hasSearched) {
+                item(key = "search_results_header", contentType = "header") {
+                    Text(
+                        text = when {
+                            state.isLoading -> "در حال جستجوی «${state.query.trim()}»…"
+                            state.results.isNotEmpty() -> "نتایج برای «${state.query.trim()}»"
+                            else -> "نتیجه‌ای برای «${state.query.trim()}» یافت نشد"
+                        },
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = TextPrimary
                     )
                 }
             }
-            is UiState.Empty -> {
-                item {
-                    if (searchQuery.isNotEmpty()) {
-                        EmptyStateView(message = "موردی برای جستجوی «$searchQuery» یافت نشد.")
-                    } else {
-                        EmptyStateView(message = "نام فیلم یا موضوع مورد نظر خود را در کادر بالا وارد کرده و دکمه جستجو را لمس کنید.")
+
+            when {
+                state.isLoading -> {
+                    items(count = 3, contentType = { "skeleton" }) {
+                        SkeletonSearchItemCard()
+                    }
+                }
+
+                state.error != null -> {
+                    item(key = "search_error", contentType = "error") {
+                        ErrorRetryView(message = state.error.orEmpty(), onRetry = viewModel::retry)
+                    }
+                }
+
+                state.results.isNotEmpty() -> {
+                    items(state.results, key = { it.id }, contentType = { "result" }) { media ->
+                        SearchResultCard(
+                            media = media,
+                            isWatchlisted = state.favoriteIds.contains(media.id),
+                            onMediaClick = { onMediaClick(media) },
+                            onToggleWatchlist = { viewModel.toggleFavorite(media) }
+                        )
+                    }
+                }
+
+                state.hasSearched && !state.isLoading -> {
+                    item(key = "search_empty", contentType = "empty") {
+                        EmptyStateView(
+                            message = "موردی برای جستجوی «${state.query.trim()}» پیدا نشد. عبارت دیگری را امتحان کنید."
+                        )
+                    }
+                }
+
+                else -> {
+                    item(key = "search_idle", contentType = "empty") {
+                        EmptyStateView(
+                            message = "نام فیلم یا سریال مورد نظر خود را در کادر بالا بنویسید؛ نتایج به‌صورت خودکار نمایش داده می‌شوند."
+                        )
                     }
                 }
             }
-            is UiState.Success -> {
-                items(state.data, key = { it.id }) { item ->
-                    LuxuriousSearchResultCard(
-                        media = item,
-                        isWatchlisted = watchlistIds.contains(item.id),
-                        onMediaClick = { onMediaClick(item) },
-                        onToggleWatchlist = { viewModel.toggleWatchlist(item.id) }
-                    )
-                }
-            }
         }
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(horizontal = 16.dp, vertical = 88.dp)
+        )
     }
 }
 
-/**
- * Beautiful, organized card for search results with full metadata and high-res poster
- */
 @Composable
-fun LuxuriousSearchResultCard(
-    media: UnifiedMedia,
+private fun SearchResultCard(
+    media: Media,
     isWatchlisted: Boolean,
     onMediaClick: () -> Unit,
     onToggleWatchlist: () -> Unit,
@@ -234,7 +266,7 @@ fun LuxuriousSearchResultCard(
         shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(containerColor = DarkSurface),
         border = BorderStroke(1.dp, GlassBorder),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
             modifier = Modifier
@@ -243,11 +275,10 @@ fun LuxuriousSearchResultCard(
             horizontalArrangement = Arrangement.spacedBy(14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // High-res Poster with aspect ratio
             Box(
                 modifier = Modifier
-                    .width(96.dp)
-                    .height(138.dp)
+                    .width(92.dp)
+                    .height(132.dp)
                     .clip(RoundedCornerShape(12.dp))
                     .background(DarkSurfaceVariant)
             ) {
@@ -259,10 +290,9 @@ fun LuxuriousSearchResultCard(
                     contentScale = ContentScale.Crop
                 )
 
-                // Type badge on poster
                 Surface(
                     shape = RoundedCornerShape(4.dp),
-                    color = if (media.isSeries) CinemaRed else Color(0xCC000000),
+                    color = if (media.isSeries) Color(0xCCB71C1C) else Color(0xCC000000),
                     modifier = Modifier
                         .align(Alignment.BottomStart)
                         .padding(6.dp)
@@ -277,14 +307,10 @@ fun LuxuriousSearchResultCard(
                 }
             }
 
-            // Info column
             Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight(),
+                modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                // Title and bookmark
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -306,14 +332,13 @@ fun LuxuriousSearchResultCard(
                     ) {
                         Icon(
                             imageVector = if (isWatchlisted) Icons.Default.Bookmark else Icons.Outlined.BookmarkBorder,
-                            contentDescription = "علاقه‌مندی",
+                            contentDescription = if (isWatchlisted) "حذف از علاقه‌مندی‌ها" else "افزودن به علاقه‌مندی‌ها",
                             tint = if (isWatchlisted) CinemaGold else TextTertiary,
                             modifier = Modifier.size(20.dp)
                         )
                     }
                 }
 
-                // IMDb Rating & Year row
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -352,18 +377,8 @@ fun LuxuriousSearchResultCard(
                             color = TextSecondary
                         )
                     }
-
-                    val safeDuration = PersianUtils.formatDuration(media.duration)
-                    if (safeDuration != null) {
-                        Text(
-                            text = "•  $safeDuration",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = TextTertiary
-                        )
-                    }
                 }
 
-                // Description excerpt
                 if (media.description.isNotBlank()) {
                     Text(
                         text = media.description,
@@ -375,28 +390,22 @@ fun LuxuriousSearchResultCard(
                     )
                 }
 
-                // Quick Play pill action
-                Row(
-                    modifier = Modifier.padding(top = 2.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                FilledTonalButton(
+                    onClick = onMediaClick,
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                    colors = ButtonDefaults.filledTonalButtonColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        contentColor = MaterialTheme.colorScheme.primary
+                    ),
+                    shape = RoundedCornerShape(50.dp)
                 ) {
-                    FilledTonalButton(
-                        onClick = onMediaClick,
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
-                        colors = ButtonDefaults.filledTonalButtonColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer,
-                            contentColor = MaterialTheme.colorScheme.primary
-                        ),
-                        shape = RoundedCornerShape(50.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.PlayArrow,
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("مشاهده و پخش", fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                    }
+                    Icon(
+                        imageVector = Icons.Default.PlayArrow,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("مشاهده و پخش", fontSize = 12.sp, fontWeight = FontWeight.Bold)
                 }
             }
         }
@@ -404,7 +413,7 @@ fun LuxuriousSearchResultCard(
 }
 
 @Composable
-fun SkeletonSearchItemCard() {
+private fun SkeletonSearchItemCard() {
     Card(
         modifier = Modifier
             .fillMaxWidth()

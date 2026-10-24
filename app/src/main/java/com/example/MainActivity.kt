@@ -2,54 +2,105 @@ package com.example
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.os.SystemClock
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
+import androidx.annotation.StringRes
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.outlined.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Bookmarks
+import androidx.compose.material.icons.filled.Movie
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Tv
+import androidx.compose.material.icons.outlined.Bookmarks
+import androidx.compose.material.icons.outlined.Movie
+import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.Tv
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.NavigationRail
+import androidx.compose.material3.NavigationRailItem
+import androidx.compose.material3.NavigationRailItemDefaults
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.model.ScreenTab
-import com.example.ui.components.CinemaTopBar
-import com.example.ui.player.ExoPlayerView
-import com.example.ui.screens.*
-import com.example.ui.theme.*
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import com.example.ui.navigation.AppNavHost
+import com.example.ui.navigation.AppRoutes
+import com.example.ui.navigation.navigateTopLevel
+import com.example.ui.theme.CinemaGold
+import com.example.ui.theme.NamagerTheme
+import com.example.ui.theme.DarkBackground
+import com.example.ui.theme.DarkSurface
+import com.example.ui.theme.TextTertiary
 import com.example.ui.util.PersianUtils
-import com.example.ui.viewmodel.CinemaViewModel
+import com.example.ui.viewmodel.AppViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.example.ui.NamagerSplashScreen
+import kotlinx.coroutines.delay
+import java.util.concurrent.TimeUnit
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+   val splash=    installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            val viewModel: CinemaViewModel = hiltViewModel()
-            val settings by viewModel.settings.collectAsStateWithLifecycle()
+            val appViewModel: AppViewModel = hiltViewModel()
+            val favoriteCount by appViewModel.favoriteCount.collectAsStateWithLifecycle()
 
-            CinematicTheme(
-                themeMode = settings.themeMode,
-                accentColor = Color(settings.accentColorHex)
+
+            splash.setOnExitAnimationListener { provider ->
+                provider.iconView.animate().scaleX(1.15f).scaleY(1.15f).setDuration(250).start()
+                provider.view.animate()
+                    .alpha(0f)
+                    .setDuration(250)
+                    .withEndAction { provider.remove() }
+                    .start()
+            }
+
+
+            NamagerTheme(
             ) {
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                    CinematicApp(viewModel = viewModel)
+
+                    CinematicApp(favoriteCount = favoriteCount)
                 }
             }
         }
@@ -59,395 +110,225 @@ class MainActivity : ComponentActivity() {
 @SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
 fun CinematicApp(
-    viewModel: CinemaViewModel = hiltViewModel()
-) {
-    val currentTab by viewModel.currentTab.collectAsStateWithLifecycle()
-    val selectedMedia by viewModel.selectedMedia.collectAsStateWithLifecycle()
-    val favoriteItems by viewModel.favoriteItems.collectAsStateWithLifecycle()
-    val activePlayingSource by viewModel.activePlayingSource.collectAsStateWithLifecycle()
-    val activePlayingTitle by viewModel.activePlayingTitle.collectAsStateWithLifecycle()
-    val activePlayingSubtitle by viewModel.activePlayingSubtitle.collectAsStateWithLifecycle()
-    val settings by viewModel.settings.collectAsStateWithLifecycle()
-
-    // Fullscreen Media3 Player if playing
-    if (activePlayingSource != null) {
-        ExoPlayerView(
-            source = activePlayingSource!!,
-            title = activePlayingTitle,
-            subtitle = activePlayingSubtitle,
-            seekJumpSeconds = settings.seekJumpSeconds,
-            onClose = { viewModel.closePlayer() },
-            modifier = Modifier.fillMaxSize()
-        )
-        return
-    }
-
-    // Detail Screen overlay if a movie/series is selected
-    if (selectedMedia != null) {
-        MovieDetailSheet(
-            media = selectedMedia!!,
-            viewModel = viewModel,
-            isWatchlist = viewModel.isFavorite(selectedMedia!!.id),
-            onClose = { viewModel.selectMedia(null) }
-        )
-        return
-    }
-
-    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-        val isWideScreen = maxWidth >= 720.dp
-
-        if (isWideScreen) {
-            // Tablet & Android TV layout: NavigationRail on side + content
-            Row(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(DarkBackground)
-            ) {
-                CinemaNavigationRail(
-                    currentTab = currentTab,
-                    watchlistCount = favoriteItems.size,
-                    onTabSelected = { viewModel.setTab(it) }
-                )
-
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                ) {
-                    /*CinemaTopBar(
-                        onSearchClick = { viewModel.setTab(ScreenTab.SEARCH) }
-                    )*/
-
-                    AnimatedTabContent(
-                        currentTab = currentTab,
-                        viewModel = viewModel,
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-            }
-        } else {
-            // Handheld layout: TopBar + Screen Content + NavigationBar at bottom
-            Scaffold(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .testTag("cinematic_main_scaffold"),
-                containerColor = DarkBackground,
-                topBar = {
-                 /*   CinemaTopBar(
-                        onSearchClick = { viewModel.setTab(ScreenTab.SEARCH) }
-                    )*/
-                },
-                bottomBar = {
-                    CinemaBottomNavigationBar(
-                        currentTab = currentTab,
-                        watchlistCount = favoriteItems.size,
-                        onTabSelected = { viewModel.setTab(it) }
-                    )
-                }
-            ) { innerPadding ->
-                AnimatedTabContent(
-                    currentTab = currentTab,
-                    viewModel = viewModel,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding)
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun AnimatedTabContent(
-    currentTab: ScreenTab,
-    viewModel: CinemaViewModel,
+    favoriteCount: Int,
     modifier: Modifier = Modifier
 ) {
-    Box(modifier = modifier) {
-        AnimatedContent(
-            targetState = currentTab,
-            transitionSpec = { fadeIn() togetherWith fadeOut() },
-            label = "TabContentAnimation"
-        ) { tab ->
-            when (tab) {
-                ScreenTab.MOVIES -> {
-                    MoviesScreen(
-                        viewModel = viewModel,
-                        onMediaClick = { viewModel.selectMedia(it) },
-                        onSearchClick = { viewModel.setTab(ScreenTab.SEARCH) }
-                    )
-                }
-                ScreenTab.SERIES -> {
-                    SeriesScreen(
-                        viewModel = viewModel,
-                        onMediaClick = { viewModel.selectMedia(it) },
-                        onSearchClick = { viewModel.setTab(ScreenTab.SEARCH) }
-                    )
-                }
-                ScreenTab.SEARCH -> {
-                    SearchScreen(
-                        viewModel = viewModel,
-                        onMediaClick = { viewModel.selectMedia(it) }
-                    )
-                }
-                ScreenTab.FAVORITES -> {
-                    FavoritesScreen(
-                        viewModel = viewModel,
-                        onMediaClick = { viewModel.selectMedia(it) }
-                    )
-                }
-                ScreenTab.SETTINGS -> {
-                    SettingsScreen(
-                        viewModel = viewModel
+    val navController = rememberNavController()
+    val backStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = backStackEntry?.destination?.route
+    val showNavigation = currentRoute == null || currentRoute in AppRoutes.topLevelRoutes
+
+    BoxWithConstraints(
+        modifier = modifier
+            .fillMaxSize()
+            .background(DarkBackground)
+    ) {
+        val useRail = maxWidth >= 720.dp && showNavigation
+
+        Row(modifier = Modifier.fillMaxSize()) {
+            if (useRail) {
+                CinemaNavigationRail(
+                    currentRoute = currentRoute,
+                    favoriteCount = favoriteCount,
+                    onSelect = { navController.navigateTopLevel(it) }
+                )
+            }
+
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+            ) {
+                AppNavHost(
+                    navController = navController,
+                    modifier = Modifier.fillMaxSize()
+                )
+
+                if (showNavigation && !useRail) {
+                    CinemaBottomNavigationBar(
+                        currentRoute = currentRoute,
+                        favoriteCount = favoriteCount,
+                        onSelect = { navController.navigateTopLevel(it) },
+                        modifier = Modifier.align(Alignment.BottomCenter)
                     )
                 }
             }
         }
     }
 }
+
+private data class TopLevelDestination(
+    val route: String,
+    @param:StringRes val labelRes: Int,
+    val selectedIcon: ImageVector,
+    val unselectedIcon: ImageVector
+)
+
+private val destinations = listOf(
+    TopLevelDestination(
+        route = AppRoutes.MOVIES,
+        labelRes = R.string.nav_movies,
+        selectedIcon = Icons.Filled.Movie,
+        unselectedIcon = Icons.Outlined.Movie
+    ),
+    TopLevelDestination(
+        route = AppRoutes.SERIES,
+        labelRes = R.string.nav_series,
+        selectedIcon = Icons.Filled.Tv,
+        unselectedIcon = Icons.Outlined.Tv
+    ),
+    TopLevelDestination(
+        route = AppRoutes.SEARCH,
+        labelRes = R.string.nav_search,
+        selectedIcon = Icons.Filled.Search,
+        unselectedIcon = Icons.Outlined.Search
+    ),
+    TopLevelDestination(
+        route = AppRoutes.FAVORITES,
+        labelRes = R.string.nav_favorites,
+        selectedIcon = Icons.Filled.Bookmarks,
+        unselectedIcon = Icons.Outlined.Bookmarks
+    ),
+    TopLevelDestination(
+        route = AppRoutes.SETTINGS,
+        labelRes = R.string.nav_settings,
+        selectedIcon = Icons.Filled.Settings,
+        unselectedIcon = Icons.Outlined.Settings
+    )
+)
 
 @Composable
 fun CinemaBottomNavigationBar(
-    currentTab: ScreenTab,
-    watchlistCount: Int,
-    onTabSelected: (ScreenTab) -> Unit,
+    currentRoute: String?,
+    favoriteCount: Int,
+    onSelect: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     NavigationBar(
         modifier = modifier
-            .testTag("cinema_bottom_nav_bar")
-            .windowInsetsPadding(WindowInsets.navigationBars),
-        containerColor = DarkSurface,
+            .windowInsetsPadding(WindowInsets.navigationBars)
+            .testTag("cinema_bottom_nav_bar"),
+       // containerColor = DarkSurface,
         tonalElevation = 8.dp
     ) {
-        // Tab 1: Movies (فیلم‌ها)
-        NavigationBarItem(
-            selected = currentTab == ScreenTab.MOVIES,
-            onClick = { onTabSelected(ScreenTab.MOVIES) },
-            icon = {
-                Icon(
-                    imageVector = if (currentTab == ScreenTab.MOVIES) Icons.Default.Movie else Icons.Outlined.Movie,
-                    contentDescription = stringResource(id = R.string.nav_movies)
-                )
-            },
-            label = {
-                Text(
-                    text = stringResource(id = R.string.nav_movies),
-                    fontWeight = if (currentTab == ScreenTab.MOVIES) FontWeight.Bold else FontWeight.Normal
-                )
-            },
-            colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = Color.Black,
-                selectedTextColor = CinemaGold,
-                indicatorColor = CinemaGold,
-                unselectedIconColor = TextTertiary,
-                unselectedTextColor = TextTertiary
-            ),
-            modifier = Modifier.testTag("nav_item_movies")
-        )
-
-        // Tab 2: Series (سریال‌ها)
-        NavigationBarItem(
-            selected = currentTab == ScreenTab.SERIES,
-            onClick = { onTabSelected(ScreenTab.SERIES) },
-            icon = {
-                Icon(
-                    imageVector = if (currentTab == ScreenTab.SERIES) Icons.Default.Tv else Icons.Outlined.Tv,
-                    contentDescription = stringResource(id = R.string.nav_series)
-                )
-            },
-            label = {
-                Text(
-                    text = stringResource(id = R.string.nav_series),
-                    fontWeight = if (currentTab == ScreenTab.SERIES) FontWeight.Bold else FontWeight.Normal
-                )
-            },
-            colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = Color.Black,
-                selectedTextColor = CinemaGold,
-                indicatorColor = CinemaGold,
-                unselectedIconColor = TextTertiary,
-                unselectedTextColor = TextTertiary
-            ),
-            modifier = Modifier.testTag("nav_item_series")
-        )
-
-        // Tab 3: Search (جستجو)
-        NavigationBarItem(
-            selected = currentTab == ScreenTab.SEARCH,
-            onClick = { onTabSelected(ScreenTab.SEARCH) },
-            icon = {
-                Icon(
-                    imageVector = if (currentTab == ScreenTab.SEARCH) Icons.Default.Search else Icons.Outlined.Search,
-                    contentDescription = stringResource(id = R.string.nav_search)
-                )
-            },
-            label = {
-                Text(
-                    text = stringResource(id = R.string.nav_search),
-                    fontWeight = if (currentTab == ScreenTab.SEARCH) FontWeight.Bold else FontWeight.Normal
-                )
-            },
-            colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = Color.Black,
-                selectedTextColor = CinemaGold,
-                indicatorColor = CinemaGold,
-                unselectedIconColor = TextTertiary,
-                unselectedTextColor = TextTertiary
-            ),
-            modifier = Modifier.testTag("nav_item_search")
-        )
-
-        // Tab 4: Favorites (علاقه‌مندی‌ها)
-        NavigationBarItem(
-            selected = currentTab == ScreenTab.FAVORITES,
-            onClick = { onTabSelected(ScreenTab.FAVORITES) },
-            icon = {
-                BadgedBox(
-                    badge = {
-                        if (watchlistCount > 0) {
-                            Badge(
-                                containerColor = CinemaRed,
-                                contentColor = Color.White
-                            ) {
-                                Text(
-                                    text = PersianUtils.toPersianDigits(watchlistCount),
-                                    style = MaterialTheme.typography.labelSmall
-                                )
+        destinations.forEach { destination ->
+            val selected = currentRoute == destination.route
+            NavigationBarItem(
+                selected = selected,
+                onClick = { onSelect(destination.route) },
+                icon = {
+                    if (destination.route == AppRoutes.FAVORITES && favoriteCount > 0) {
+                        BadgedBox(
+                            badge = {
+                                Badge(containerColor = CinemaGold, contentColor = Color.Black) {
+                                    Text(
+                                        text = PersianUtils.toPersianDigits(favoriteCount),
+                                        style = MaterialTheme.typography.labelSmall
+                                    )
+                                }
                             }
+                        ) {
+                            Icon(
+                                imageVector = if (selected) {
+                                    destination.selectedIcon
+                                } else {
+                                    destination.unselectedIcon
+                                },
+                                contentDescription = stringResource(destination.labelRes)
+                            )
                         }
+                    } else {
+                        Icon(
+                            imageVector = if (selected) {
+                                destination.selectedIcon
+                            } else {
+                                destination.unselectedIcon
+                            },
+                            contentDescription = stringResource(destination.labelRes)
+                        )
                     }
-                ) {
-                    Icon(
-                        imageVector = if (currentTab == ScreenTab.FAVORITES) Icons.Default.Bookmarks else Icons.Outlined.Bookmarks,
-                        contentDescription = stringResource(id = R.string.nav_favorites)
+                },
+                label = {
+                    Text(
+                        text = stringResource(destination.labelRes),
+                        fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
                     )
-                }
-            },
-            label = {
-                Text(
-                    text = stringResource(id = R.string.nav_favorites),
-                    fontWeight = if (currentTab == ScreenTab.FAVORITES) FontWeight.Bold else FontWeight.Normal
-                )
-            },
-            colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = Color.Black,
-                selectedTextColor = CinemaGold,
-                indicatorColor = CinemaGold,
-                unselectedIconColor = TextTertiary,
-                unselectedTextColor = TextTertiary
-            ),
-            modifier = Modifier.testTag("nav_item_favorites")
-        )
-
-        // Tab 5: Settings (تنظیمات)
-        NavigationBarItem(
-            selected = currentTab == ScreenTab.SETTINGS,
-            onClick = { onTabSelected(ScreenTab.SETTINGS) },
-            icon = {
-                Icon(
-                    imageVector = if (currentTab == ScreenTab.SETTINGS) Icons.Default.Settings else Icons.Outlined.Settings,
-                    contentDescription = stringResource(id = R.string.nav_settings)
-                )
-            },
-            label = {
-                Text(
-                    text = stringResource(id = R.string.nav_settings),
-                    fontWeight = if (currentTab == ScreenTab.SETTINGS) FontWeight.Bold else FontWeight.Normal
-                )
-            },
-            colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = Color.Black,
-                selectedTextColor = CinemaGold,
-                indicatorColor = CinemaGold,
-                unselectedIconColor = TextTertiary,
-                unselectedTextColor = TextTertiary
-            ),
-            modifier = Modifier.testTag("nav_item_settings")
-        )
+                },
+                colors = NavigationBarItemDefaults.colors(
+                    selectedIconColor = Color.Black,
+                    selectedTextColor = CinemaGold,
+                    indicatorColor = CinemaGold,
+                    unselectedIconColor = TextTertiary,
+                    unselectedTextColor = TextTertiary
+                ),
+                modifier = Modifier.testTag("nav_item_${destination.route}")
+            )
+        }
     }
 }
 
 @Composable
 fun CinemaNavigationRail(
-    currentTab: ScreenTab,
-    watchlistCount: Int,
-    onTabSelected: (ScreenTab) -> Unit,
+    currentRoute: String?,
+    favoriteCount: Int,
+    onSelect: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     NavigationRail(
         modifier = modifier
             .fillMaxHeight()
+            .statusBarsPadding()
+            .windowInsetsPadding(WindowInsets.navigationBars)
             .testTag("cinema_navigation_rail"),
         containerColor = DarkSurface
     ) {
-        Spacer(modifier = Modifier.height(16.dp))
-
-        NavigationRailItem(
-            selected = currentTab == ScreenTab.MOVIES,
-            onClick = { onTabSelected(ScreenTab.MOVIES) },
-            icon = { Icon(Icons.Default.Movie, contentDescription = null) },
-            label = { Text("فیلم‌ها") },
-            colors = NavigationRailItemDefaults.colors(
-                selectedIconColor = Color.Black,
-                indicatorColor = CinemaGold
-            )
-        )
-
-        NavigationRailItem(
-            selected = currentTab == ScreenTab.SERIES,
-            onClick = { onTabSelected(ScreenTab.SERIES) },
-            icon = { Icon(Icons.Default.Tv, contentDescription = null) },
-            label = { Text("سریال‌ها") },
-            colors = NavigationRailItemDefaults.colors(
-                selectedIconColor = Color.Black,
-                indicatorColor = CinemaGold
-            )
-        )
-
-        NavigationRailItem(
-            selected = currentTab == ScreenTab.SEARCH,
-            onClick = { onTabSelected(ScreenTab.SEARCH) },
-            icon = { Icon(Icons.Default.Search, contentDescription = null) },
-            label = { Text("جستجو") },
-            colors = NavigationRailItemDefaults.colors(
-                selectedIconColor = Color.Black,
-                indicatorColor = CinemaGold
-            )
-        )
-
-        NavigationRailItem(
-            selected = currentTab == ScreenTab.FAVORITES,
-            onClick = { onTabSelected(ScreenTab.FAVORITES) },
-            icon = {
-                BadgedBox(
-                    badge = {
-                        if (watchlistCount > 0) {
-                            Badge(containerColor = CinemaRed) {
-                                Text(PersianUtils.toPersianDigits(watchlistCount))
+        destinations.forEach { destination ->
+            val selected = currentRoute == destination.route
+            NavigationRailItem(
+                selected = selected,
+                onClick = { onSelect(destination.route) },
+                icon = {
+                    if (destination.route == AppRoutes.FAVORITES && favoriteCount > 0) {
+                        BadgedBox(
+                            badge = {
+                                Badge(containerColor = CinemaGold, contentColor = Color.Black) {
+                                    Text(
+                                        text = PersianUtils.toPersianDigits(favoriteCount),
+                                        style = MaterialTheme.typography.labelSmall
+                                    )
+                                }
                             }
+                        ) {
+                            Icon(
+                                imageVector = if (selected) {
+                                    destination.selectedIcon
+                                } else {
+                                    destination.unselectedIcon
+                                },
+                                contentDescription = null
+                            )
                         }
+                    } else {
+                        Icon(
+                            imageVector = if (selected) {
+                                destination.selectedIcon
+                            } else {
+                                destination.unselectedIcon
+                            },
+                            contentDescription = null
+                        )
                     }
-                ) {
-                    Icon(Icons.Default.Bookmarks, contentDescription = null)
-                }
-            },
-            label = { Text("علاقه‌مندی‌ها") },
-            colors = NavigationRailItemDefaults.colors(
-                selectedIconColor = Color.Black,
-                indicatorColor = CinemaGold
+                },
+                label = { Text(stringResource(destination.labelRes)) },
+                colors = NavigationRailItemDefaults.colors(
+                    selectedIconColor = Color.Black,
+                    selectedTextColor = CinemaGold,
+                    indicatorColor = CinemaGold,
+                    unselectedIconColor = TextTertiary,
+                    unselectedTextColor = TextTertiary
+                ),
+                modifier = Modifier.testTag("rail_item_${destination.route}")
             )
-        )
-
-        NavigationRailItem(
-            selected = currentTab == ScreenTab.SETTINGS,
-            onClick = { onTabSelected(ScreenTab.SETTINGS) },
-            icon = { Icon(Icons.Default.Settings, contentDescription = null) },
-            label = { Text("تنظیمات") },
-            colors = NavigationRailItemDefaults.colors(
-                selectedIconColor = Color.Black,
-                indicatorColor = CinemaGold
-            )
-        )
+        }
     }
 }
