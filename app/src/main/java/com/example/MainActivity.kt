@@ -25,6 +25,11 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.NavigationRailItemDefaults
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -62,29 +67,41 @@ import com.example.ui.navigation.destinations
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-   val splash=    installSplashScreen()
+        val splash = installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             val appViewModel: AppViewModel = hiltViewModel()
             val favoriteCount by appViewModel.favoriteCount.collectAsStateWithLifecycle()
 
-
             splash.setOnExitAnimationListener { provider ->
-                provider.iconView.animate().scaleX(1.15f).scaleY(1.15f).setDuration(250).start()
+                provider.iconView.animate().scaleX(1.15f).scaleY(1.15f).setDuration(200).start()
                 provider.view.animate()
                     .alpha(0f)
-                    .setDuration(250)
+                    .setDuration(200)
                     .withEndAction { provider.remove() }
                     .start()
             }
 
-
-            NamagerTheme(
-            ) {
+            NamagerTheme {
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+                    var showSplash by rememberSaveable { mutableStateOf(true) }
 
-                    CinematicApp(favoriteCount = favoriteCount)
+                    AnimatedContent(
+                        targetState = showSplash,
+                        transitionSpec = {
+                            fadeIn(animationSpec = tween(450)) togetherWith fadeOut(animationSpec = tween(450))
+                        },
+                        label = "SplashScreenTransition"
+                    ) { isSplash ->
+                        if (isSplash) {
+                            NamagerSplashScreen(
+                                onFinished = { showSplash = false }
+                            )
+                        } else {
+                            CinematicApp(favoriteCount = favoriteCount)
+                        }
+                    }
                 }
             }
         }

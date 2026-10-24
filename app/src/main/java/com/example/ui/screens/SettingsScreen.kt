@@ -1,7 +1,10 @@
 package com.example.ui.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.res.painterResource
+import com.example.R
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -405,20 +408,27 @@ fun SettingsScreen(
             onDismissRequest = { showAboutDialog = false },
             title = { Text("درباره اپلیکیشن", fontWeight = FontWeight.Bold) },
             text = {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.app_logo),
+                        contentDescription = "لوگوی نماگر",
+                        modifier = Modifier
+                            .size(76.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                    )
                     Text(
-                        "Cinematic View",
+                        "نماگر (نسخه ${PersianUtils.toPersianDigits(BuildConfig.VERSION_NAME)})",
                         color = TextPrimary,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleMedium
                     )
                     Text(
-                        "پلتفرم تماشای فیلم و سریال، ساخته‌شده با Jetpack Compose و Material 3 برای موبایل، تبلت و Android TV.",
+                        "پلتفرم تماشای آنلاین فیلم و سریال، ساخته‌شده با Jetpack Compose و Material 3 همراه با پخش‌کننده روان Media3 و امکان دانلود مستقیم.",
                         color = TextSecondary,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    Text(
-                        "معماری تمیز، ناوبری امن، مدیریت خطا و پخش‌کننده اختصاصی Media3.",
-                        color = TextTertiary,
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
