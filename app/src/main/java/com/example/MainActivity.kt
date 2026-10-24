@@ -35,7 +35,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -62,26 +64,17 @@ import com.example.ui.util.PersianUtils
 import com.example.ui.viewmodel.AppViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.example.ui.NamagerSplashScreen
 import com.example.ui.navigation.destinations
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-        val splash = installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             val appViewModel: AppViewModel = hiltViewModel()
             val favoriteCount by appViewModel.favoriteCount.collectAsStateWithLifecycle()
-
-            splash.setOnExitAnimationListener { provider ->
-                provider.iconView.animate().scaleX(1.15f).scaleY(1.15f).setDuration(200).start()
-                provider.view.animate()
-                    .alpha(0f)
-                    .setDuration(200)
-                    .withEndAction { provider.remove() }
-                    .start()
-            }
 
             NamagerTheme {
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
