@@ -46,6 +46,7 @@ media3 = "1.5.1"
 hilt = "2.60.1"
 hiltNavigationCompose = "1.2.0"
 runtimeSaveable = "1.11.0"
+lottie = "6.7.1"
 
 
 [libraries]
@@ -107,6 +108,7 @@ hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref
 hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt" }
 androidx-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 androidx-compose-runtime-saveable = { group = "androidx.compose.runtime", name = "runtime-saveable", version.ref = "runtimeSaveable" }
+lottie-compose = { group = "com.airbnb.android", name = "lottie-compose", version.ref = "lottie" }
 
 
 [plugins]

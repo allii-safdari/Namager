@@ -1,7 +1,7 @@
 package com.example
-
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.os.SystemClock
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -25,6 +25,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,37 +37,82 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.core.splashscreen.SplashScreen
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.airbnb.lottie.LottieCompositionFactory
+import com.example.ui.app.NamagerLottieSplash
 import com.example.ui.navigation.AppNavHost
 import com.example.ui.navigation.AppRoutes
+import com.example.ui.navigation.destinations
 import com.example.ui.navigation.navigateTopLevel
+import com.example.ui.theme.Flame
 import com.example.ui.theme.FlameLight
 import com.example.ui.theme.NamagerTheme
 import com.example.ui.theme.TextTertiary
 import com.example.ui.util.PersianUtils
 import com.example.ui.viewmodel.AppViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import com.example.ui.navigation.destinations
-import com.example.ui.theme.Flame
+
+const val SPLASH_ASSET = "namager_splash.json"
+private const val SPLASH_LOAD_TIMEOUT_MS = 600L
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    // true وقتی انیمیشن Lottie در حافظه بارگذاری شد (یا بارگذاری شکست خورد)
+    @Volatile
+    private var lottieReady = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        val splash = installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+
+        val playIntro = savedInstanceState == null
+        if (playIntro) setupSplash(splash)
+
         setContent {
             val appViewModel: AppViewModel = hiltViewModel()
             val favoriteCount by appViewModel.favoriteCount.collectAsStateWithLifecycle()
+            var showSplash by rememberSaveable { mutableStateOf(playIntro) }
 
             NamagerTheme {
-                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                    CinematicApp(favoriteCount = favoriteCount)
+                Box(modifier = Modifier.fillMaxSize()) {
+                    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+                        CinematicApp(favoriteCount = favoriteCount)
+                    }
+
+
+                    if (showSplash) {
+                        NamagerLottieSplash(
+                            isAppReady = true,
+                            onFinished = { showSplash = false },
+//                            speed = 0.8f,
+//                            minDisplayMs = 2000L
+                        )
+                    }
                 }
             }
         }
+    }
+
+
+    private fun setupSplash(splash: SplashScreen) {
+        val start = SystemClock.uptimeMillis()
+
+        LottieCompositionFactory.fromAsset(this, SPLASH_ASSET)
+            .addListener { lottieReady = true }
+            .addFailureListener { lottieReady = true }
+
+        splash.setKeepOnScreenCondition {
+            !lottieReady && SystemClock.uptimeMillis() - start < SPLASH_LOAD_TIMEOUT_MS
+        }
+        splash.setOnExitAnimationListener { provider -> provider.remove() }
     }
 }
 
