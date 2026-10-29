@@ -1,6 +1,6 @@
 package com.example.data.repository
 
-import com.example.data.remote.CinemaApi
+import com.example.data.remote.NamagerApi
 import com.example.data.remote.MediaJsonParser
 import com.example.domain.model.FilterOrder
 import com.example.domain.model.Genre
@@ -15,7 +15,7 @@ import javax.inject.Singleton
 
 @Singleton
 class MediaRepositoryImpl @Inject constructor(
-    private val api: CinemaApi,
+    private val api: NamagerApi,
     private val parser: MediaJsonParser
 ) : CatalogRepository {
 

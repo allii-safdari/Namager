@@ -63,7 +63,7 @@ private const val SPLASH_LOAD_TIMEOUT_MS = 600L
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    // true وقتی انیمیشن Lottie در حافظه بارگذاری شد (یا بارگذاری شکست خورد)
+    // True when Lottie animation is loaded in memory or failed
     @Volatile
     private var lottieReady = false
 
@@ -84,7 +84,7 @@ class MainActivity : ComponentActivity() {
             NamagerTheme {
                 Box(modifier = Modifier.fillMaxSize()) {
                     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                        CinematicApp(favoriteCount = favoriteCount)
+                        NamagerApp(favoriteCount = favoriteCount)
                     }
 
 
@@ -118,7 +118,7 @@ class MainActivity : ComponentActivity() {
 
 @SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
-fun CinematicApp(
+fun NamagerApp(
     favoriteCount: Int,
     modifier: Modifier = Modifier
 ) {

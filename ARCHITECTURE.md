@@ -1,4 +1,4 @@
-# Cinematic View — Architecture Notes
+# Namager — Architecture Notes
 
 ## Layers
 
@@ -76,7 +76,7 @@ the bottom bar automatically.
 
 ## Persistence compatibility
 
-The preference file name remains `cinematic_prefs`, and the same keys are used
+The preference file name remains `namager_prefs`, and the same keys are used
 for favourites, groups, watched episodes and settings. Old favourite JSON
 (which did not store genres/sources/country) is still readable; missing arrays
 are treated as empty.

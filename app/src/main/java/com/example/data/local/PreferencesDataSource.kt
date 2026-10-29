@@ -246,7 +246,7 @@ class PreferencesDataSource @Inject constructor(
     private fun subtitlesSafeSize(value: Int): Int = value.coerceIn(12, 32)
 
     private companion object {
-        const val PREFERENCES_NAME = "cinematic_prefs"
+        const val PREFERENCES_NAME = "namager_prefs"
         const val KEY_GROUPS = "pref_fav_groups"
         const val KEY_FAVORITES = "pref_fav_items"
         const val KEY_WATCHED_EPISODES = "pref_watched_episodes"

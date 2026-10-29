@@ -22,6 +22,6 @@ dependencyResolutionManagement {
   }
 }
 
-rootProject.name = "Cinematic View"
+rootProject.name = "Namager"
 
 include(":app")

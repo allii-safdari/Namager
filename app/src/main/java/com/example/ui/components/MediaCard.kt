@@ -89,7 +89,7 @@ fun MediaCard(
                     .aspectRatio(2f / 3f)
                     .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
             ) {
-                CinematicPosterImage(
+                NamagerPosterImage(
                     imageUrl = media.image,
                     contentDescription = media.title,
                     modifier = Modifier.fillMaxSize(),

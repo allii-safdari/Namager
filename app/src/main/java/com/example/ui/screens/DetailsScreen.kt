@@ -83,7 +83,7 @@ import com.example.domain.model.Episode
 import com.example.domain.model.Media
 import com.example.domain.model.Season
 import com.example.domain.model.Source
-import com.example.ui.components.CinematicPosterImage
+import com.example.ui.components.NamagerPosterImage
 import com.example.ui.components.DownloadOptionsDialog
 import com.example.ui.components.EmptyStateView
 import com.example.ui.components.ErrorRetryView
@@ -562,7 +562,7 @@ private fun DetailsHeader(
         val backdropUrl = media.cover.ifBlank { media.image }
         val posterUrl = media.image.ifBlank { media.cover }
 
-        CinematicPosterImage(
+        NamagerPosterImage(
             imageUrl = backdropUrl,
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
@@ -639,7 +639,7 @@ private fun DetailsHeader(
                     .border(1.dp, GlassBorder, RoundedCornerShape(12.dp))
                     .background(DarkSurface)
             ) {
-                CinematicPosterImage(
+                NamagerPosterImage(
                     imageUrl = posterUrl,
                     contentDescription = media.title,
                     modifier = Modifier.fillMaxSize(),
@@ -707,10 +707,6 @@ private fun DetailsHeader(
                 }
 
                 PersianUtils.formatDuration(media.duration)?.let { text ->
-
-                    /*val durationText = text
-                        .replace("min", "") // تغییر "دقیقه" به "د"
-                        .trim()*/
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
@@ -1101,7 +1097,7 @@ private fun EpisodePlayItem(
                     .background(DarkSurfaceVariant),
                 contentAlignment = Alignment.Center
             ) {
-                CinematicPosterImage(
+                NamagerPosterImage(
                     imageUrl = episode.image,
                     contentDescription = episode.title,
                     modifier = Modifier.fillMaxSize(),

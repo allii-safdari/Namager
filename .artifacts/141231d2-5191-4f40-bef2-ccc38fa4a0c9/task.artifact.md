@@ -1,0 +1,6 @@
+- [x] Add Hilt versions, libraries, and plugins to version catalog and build files
+- [/] Create CinemaApplication.kt and update AndroidManifest.xml
+- [ ] Establish Clean Architecture structure (domain repository interfaces, data implementations)
+- [ ] Create DI modules (AppModule, RepositoryModule)
+- [ ] Update CinemaViewModel and MainActivity with Hilt annotations
+- [ ] Verify build and dependency injection graph via Gradle build

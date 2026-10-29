@@ -23,7 +23,7 @@ val TextPrimary = Color(0xFFF8F1E6)
 val TextSecondary = Color(0xFFB8B0A4)
 val TextTertiary = Color(0xFF78788C)
 
-// نام‌های قبلی: مقدارشان با برند هماهنگ شد
+// Brand aligned palette colors
 val FlameLight = Color(0xFFFFB02E)
 val Flame = Color(0xFFFF6B22)
 
@@ -43,7 +43,7 @@ val NamagerIvory = Color(0xFFFFF1DE)
 val NamagerMuted = Color(0xFFB9B1A8)*/
 
 /*
-// Cinematic Palette
+// Namager Palette
 val CinemaGold = Color(0xFFF5C518)       // Amber/Gold IMDb accent
 val CinemaGoldDark = Color(0xFFD49E0F)
 val CinemaGoldLight = Color(0xFFFFD54F)
