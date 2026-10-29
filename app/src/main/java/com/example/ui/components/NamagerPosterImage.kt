@@ -33,7 +33,7 @@ import com.example.ui.theme.DarkSurfaceVariant
  * measurable scrolling jank in the grid.
  */
 @Composable
-fun CinematicPosterImage(
+fun NamagerPosterImage(
     imageUrl: String?,
     contentDescription: String?,
     modifier: Modifier = Modifier,

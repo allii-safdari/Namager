@@ -13,12 +13,11 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 
 /**
- * Thin HTTP gateway for the catalogue API. It owns mirror fallback and converts
- * transport failures into typed [AppException]s so callers do not depend on
- * OkHttp details.
+ * HTTP gateway for the catalog API. Handles mirror fallback and converts
+ * transport failures into typed [AppException]s.
  */
 @Singleton
-class CinemaApi @Inject constructor(
+class NamagerApi @Inject constructor(
     private val client: OkHttpClient
 ) {
     private val baseUrl = BuildConfig.BASE_URL.trimEnd('/')
@@ -36,7 +35,7 @@ class CinemaApi @Inject constructor(
                 val request = Request.Builder()
                     .url(url)
                     .header("Accept", "application/json")
-                    .header("User-Agent", "CinematicView/1.0")
+                    .header("User-Agent", "Namager/1.0")
                     .build()
 
                 client.newCall(request).execute().use { response ->

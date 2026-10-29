@@ -76,7 +76,7 @@ fun GenreChipsRow(
                 colors = FilterChipDefaults.filterChipColors(
                     selectedContainerColor = Flame,
                     selectedLabelColor = Color.White,
-                    containerColor = Color(0x661E1E2C), // شفافیت شیشه‌ای کنترل‌شده
+                    containerColor = Color(0x661E1E2C),
                     labelColor = TextPrimary
                 ),
                 border = FilterChipDefaults.filterChipBorder(

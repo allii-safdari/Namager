@@ -78,7 +78,7 @@ fun HeroBanner(
             .clickable { onDetailsClick(media) }
             .testTag("hero_banner_${media.id}")
     ) {
-        CinematicPosterImage(
+        NamagerPosterImage(
             imageUrl = imageUrl,
             contentDescription = media.title,
             modifier = Modifier.fillMaxSize(),

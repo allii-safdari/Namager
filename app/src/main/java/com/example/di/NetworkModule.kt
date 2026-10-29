@@ -1,6 +1,6 @@
 package com.example.di
 
-import com.example.data.remote.CinemaApi
+import com.example.data.remote.NamagerApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -14,5 +14,5 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(): OkHttpClient = CinemaApi.defaultClient()
+    fun provideOkHttpClient(): OkHttpClient = NamagerApi.defaultClient()
 }

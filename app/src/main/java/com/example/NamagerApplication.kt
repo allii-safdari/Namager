@@ -8,7 +8,7 @@ import coil.memory.MemoryCache
 import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
-class MyMovieApplication : Application(), ImageLoaderFactory {
+class NamagerApplication : Application(), ImageLoaderFactory {
     override fun newImageLoader(): ImageLoader {
         return ImageLoader.Builder(this)
             .memoryCache {

@@ -49,7 +49,7 @@ import androidx.compose.ui.unit.dp
 import com.example.domain.model.FilterOrder
 import com.example.domain.model.Media
 import com.example.domain.model.MediaKind
-import com.example.ui.components.CinematicGlassTopBar
+import com.example.ui.components.NamagerGlassTopBar
 import com.example.ui.components.EmptyStateView
 import com.example.ui.components.ErrorRetryView
 import com.example.ui.components.GenreChipsRow
@@ -283,7 +283,7 @@ fun CatalogFeedScreen(
             }
         }
 
-        CinematicGlassTopBar(
+        NamagerGlassTopBar(
             title = if (state.kind == MediaKind.MOVIE) "فیلم‌ها" else "سریال‌ها",
             selectedOrder = state.order,
             onOrderSelected = onOrderSelected,

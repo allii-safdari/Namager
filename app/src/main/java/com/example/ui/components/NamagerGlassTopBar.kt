@@ -30,20 +30,18 @@ import com.example.ui.theme.TextPrimary
 import com.example.ui.theme.TextSecondary
 
 /**
-- TopAppBar
-شیشه‌ای (Glassmorphism) برای صفحات فیلم‌ها و سریال‌ها.
--
-اجازه می‌دهد تصاویر اسلایدشو از زیر نوار بالایی دیده شوند در حالی که خوانایی کامل حفظ می‌شود.
+ * Glassmorphic top app bar for catalog screens.
+ * Allows backdrop images to show through while maintaining text legibility.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CinematicGlassTopBar(
+fun NamagerGlassTopBar(
     title: String,
     selectedOrder: FilterOrder,
     onOrderSelected: (FilterOrder) -> Unit,
     onSearchClick: () -> Unit,
     modifier: Modifier = Modifier,
-    testTag: String = "cinematic_top_bar"
+    testTag: String = "namager_top_bar"
 ) {
     var menuOpen by remember { mutableStateOf(false) }
 
@@ -52,7 +50,7 @@ fun CinematicGlassTopBar(
             .fillMaxWidth()
             .testTag(testTag)
     ) {
-        // پس‌زمینه شیشه‌ای و گرادیان تاریک محافظ کنتراست
+        // Glass background and contrast gradient
         Box(
             modifier = Modifier
                 .matchParentSize()
@@ -188,7 +186,7 @@ fun CinematicGlassTopBar(
 
             }
 
-            // خط باریک افقی شیشه‌ای در پایین نوار
+            // Bottom divider
             HorizontalDivider(thickness = 0.5.dp, color = GlassBorder)
         }
     }

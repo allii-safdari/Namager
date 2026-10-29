@@ -61,7 +61,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.domain.model.Media
-import com.example.ui.components.CinematicPosterImage
+import com.example.ui.components.NamagerPosterImage
 import com.example.ui.components.EmptyStateView
 import com.example.ui.components.ErrorRetryView
 import com.example.ui.theme.FlameLight
@@ -282,7 +282,7 @@ private fun SearchResultCard(
                     .clip(RoundedCornerShape(12.dp))
                     .background(DarkSurfaceVariant)
             ) {
-                CinematicPosterImage(
+                NamagerPosterImage(
                     imageUrl = media.image,
                     contentDescription = media.title,
                     modifier = Modifier.fillMaxSize(),
